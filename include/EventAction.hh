@@ -38,9 +38,9 @@ class HistoManager;
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 using namespace std;
-
 static const int MAXSTEPS = 1000;
 static const int NUMSTEPVARS = 14;
+
 
 class EventAction : public G4UserEventAction
 {

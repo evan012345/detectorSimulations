@@ -194,21 +194,21 @@ void EventAction::ClearVariables()
       LaBrCrystTrackDet[i]              = 0 ;
       SodiumIodideCrystEnergyDet[i]     = 0 ;
       SodiumIodideCrystTrackDet[i]      = 0 ;
-      
-      
+
+
       SceptarSquareCrystEnergyDet[i]					= 0 ;
       SceptarSquareCrystTrackDet[i] 					= 0 ;
       SceptarAngledCrystEnergyDet[i]					= 0 ;
       SceptarAngledCrystTrackDet[i] 					= 0 ;
 
-      EightPiCrystEnergyDet[i]					= 0 ; 
+      EightPiCrystEnergyDet[i]					= 0 ;
       EightPiCrystTrackDet[i]						= 0 ;
       SpiceCrystEnergyDet[i]						= 0 ;
       SpiceCrystTrackDet[i]							= 0 ;
       PacesCrystEnergyDet[i]						= 0 ;
       PacesCrystTrackDet[i]							= 0 ;
-      
-      
+
+
   }
   for (G4int i = 0 ; i < MAXNUMDETGRIFFIN; i++) {
     for (G4int j = 0 ; j < MAXNUMCRYGRIFFIN; j++) {
@@ -227,33 +227,33 @@ void EventAction::ClearVariables()
         GriffinSuppressorRightSideTrackDet[i][j]         = 0;
     }
   }
-  
-  // NOTE: Clear the variables from the new Fill___Cryst functions.   
-  
+
+  // NOTE: Clear the variables from the new Fill___Cryst functions.
+
 }
 
 
 void EventAction::FillParticleType()
 {
     G4int numParticleTypes = 0;
-    for (G4int i = 0 ; i < NUMPARTICLETYPES; i++) 
-		  {
-		    if (particleTypes[i] != 0) 
-				  { // if particle type 'i' has non-zero counts
-				    for (G4int j = 0 ; j< particleTypes[i]; j++) 
-						  { // loop over the number of time we saw it
-						    //G4cout << "particleTypes[" << i << "] = " << particleTypes[i] << G4endl;
-						    histoManager->FillHisto(astats_particle_type_in_each_step, i);
-						  }
-				  }
-		  }	
+    for (G4int i = 0 ; i < NUMPARTICLETYPES; i++)
+          {
+            if (particleTypes[i] != 0)
+                  { // if particle type 'i' has non-zero counts
+                    for (G4int j = 0 ; j< particleTypes[i]; j++)
+                          { // loop over the number of time we saw it
+                            //G4cout << "particleTypes[" << i << "] = " << particleTypes[i] << G4endl;
+                            histoManager->FillHisto(astats_particle_type_in_each_step, i);
+                          }
+                  }
+          }
 
     // Fill the number of particle types in the event
     for (G4int i = 0 ; i < NUMPARTICLETYPES; i++)
-	  {
-	    if (particleTypes[i] != 0) 
-	    	numParticleTypes++;
-	  }
+      {
+        if (particleTypes[i] != 0)
+            numParticleTypes++;
+      }
     histoManager->FillHisto(astats_particle_type_in_each_event, numParticleTypes);
 }
 
@@ -261,16 +261,16 @@ void EventAction::FillGridEkin()
 {
     for (G4int i = 0 ; i < MAXNUMDET; i++)
     {
-      if(gridEKinGammaDet[i] > MINENERGYTHRES) 
+      if(gridEKinGammaDet[i] > MINENERGYTHRES)
       {
         // fill energies in each detector
         if(WRITEEKINHISTOS)   histoManager->FillHisto(gridcell_gamma_ekin_det0+i, gridEKinGammaDet[i]);
         if(WRITETRACKLHISTOS) histoManager->FillHisto(gridcell_gamma_trackl_det0+i, gridTrackGammaDet[i]);
       }
     }
-    for (G4int i = 0 ; i < MAXNUMDET; i++) 
+    for (G4int i = 0 ; i < MAXNUMDET; i++)
     {
-      if(gridEKinElectronDet[i] > MINENERGYTHRES) 
+      if(gridEKinElectronDet[i] > MINENERGYTHRES)
       {
         // fill energies in each detector
         if(WRITEEKINHISTOS)   histoManager->FillHisto(gridcell_electron_ekin_det0+i, gridEKinElectronDet[i]);
@@ -393,10 +393,10 @@ void EventAction::FillSodiumIodideCryst()
 }
 
 // These still need to be filled to carry out the appropriate tasks. I am unsure what exactly needs
-// to be done in each so I will initialize them and leave it to someone who knows. 
-// NOTE: The arrays defined here also need to be cleared in ClearVariables() above. 
+// to be done in each so I will initialize them and leave it to someone who knows.
+// NOTE: The arrays defined here also need to be cleared in ClearVariables() above.
 
-void EventAction::FillSceptarCryst() 
+void EventAction::FillSceptarCryst()
 {
     G4double  energySum = 0, trackSum = 0;
     for (G4int i=0; i < MAXNUMDET; i++) {
@@ -426,24 +426,24 @@ void EventAction::FillSceptarCryst()
     }
 }
 
-void EventAction::Fill8piCryst() 
+void EventAction::Fill8piCryst()
 {
 
 }
 
-void EventAction::FillSpiceCryst() 
+void EventAction::FillSpiceCryst()
 {
 
 }
 
-void EventAction::FillS3Cryst() 
+void EventAction::FillS3Cryst()
 {
 
 }
 
-void EventAction::FillPacesCryst() 
+void EventAction::FillPacesCryst()
 {
-		G4double  energySum = 0, trackSum = 0;
+        G4double  energySum = 0, trackSum = 0;
     for (G4int i=0; i < MAXNUMDET; i++) {
       if(PacesCrystEnergyDet[i] > MINENERGYTHRES) {
         // fill energies in each detector
@@ -457,7 +457,7 @@ void EventAction::FillPacesCryst()
     }
     if(energySum > MINENERGYTHRES) {
       if(WRITEEDEPHISTOS)     histoManager->FillHisto(paces_crystal_edep_sum, energySum);
-    }     
+    }
 }
 
 //void AddStepTracker(G4int eventNumber, G4int stepNumber, G4int cryNumber, G4int detNumber, G4double depEnergy, G4double posx, G4double posy, G4double posz, G4double time)
