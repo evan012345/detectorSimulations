@@ -23,6 +23,8 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
+// $Id: PhysicsList.hh 68007 2013-03-13 11:28:03Z gcosmo $
+//
 /// \file radioactivedecay/rdecay02/include/PhysicsList.hh
 /// \brief Definition of the PhysicsList class
 //
@@ -38,7 +40,7 @@
 
 class G4VPhysicsConstructor;
 class PhysicsListMessenger;
-//class G4ProductionCuts;
+class G4ProductionCuts;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -58,8 +60,8 @@ public:
   void SelectPhysicsList(const G4String& name);
   virtual void ConstructProcess();
 
-  //void SetTargetCut(G4double val);
-  //void SetDetectorCut(G4double val);
+  void SetTargetCut(G4double val);
+  void SetDetectorCut(G4double val);
 
 private:
 
@@ -82,8 +84,8 @@ private:
   G4int fNhadcomp;  
 
   PhysicsListMessenger* fPMessenger;
-//  G4ProductionCuts* fDetectorCuts;
-//  G4ProductionCuts* fTargetCuts;
+  G4ProductionCuts* fDetectorCuts;
+  G4ProductionCuts* fTargetCuts;
 
 };
 

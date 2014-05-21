@@ -23,9 +23,11 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
+/// \file analysis/shared/include/DetectorConstruction.hh
+/// \brief Definition of the DetectorConstruction class
 //
-// $Id: DetectorConstruction.hh,v 1.1 2010-10-18 15:56:17 maire Exp $
-// GEANT4 tag $Name: geant4-09-04-patch-02 $
+//
+// $Id: DetectorConstruction.hh 77256 2013-11-22 10:10:23Z gcosmo $
 //
 // 
 
@@ -39,27 +41,24 @@
 #include "globals.hh"
 #include "G4ThreeVector.hh"
 
-
 class G4Box;
 class G4LogicalVolume;
 class G4VPhysicalVolume;
 class G4Material;
-
 class DetectorMessenger;
-class SensitiveDetector;
-class DetectionSystemGammaTracking;
+//class DetectionSystemGammaTracking;
 class DetectionSystemGriffin;
 class DetectionSystem8pi;
 class DetectionSystemSceptar;
 class DetectionSystemSpice;
-class DetectionSystemS3;
+class DetectionSystemSpiceV02;
 class DetectionSystemPaces;
 class DetectionSystemSodiumIodide;
 class DetectionSystemLanthanumBromide;
-
 class DetectionSystemBox;
+class DetectionSystemAncillaryBGO;
 
-class MagneticField;
+//class MagneticField;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -75,32 +74,31 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     void SetWorldMaterial( G4String );
     void SetWorldDimensions( G4ThreeVector );
     void SetWorldVis( G4bool );
-    void SetWorldMagneticField( G4ThreeVector );
-    void SetTabMagneticField(G4String);
+//    void SetWorldMagneticField( G4ThreeVector );
 
-    void SetGenericTargetMaterial( G4String );
-    void SetGenericTargetDimensions( G4ThreeVector );
-    void SetGenericTargetPosition( G4ThreeVector );
-    void SetGenericTarget( );
-    void SetFieldBoxMaterial( G4String );
-    void SetFieldBoxDimensions( G4ThreeVector );
-    void SetFieldBoxPosition( G4ThreeVector );
-    void SetFieldBoxMagneticField( G4ThreeVector );
-    void SetFieldBox( );
-		    
-    void SetBoxMat( G4String input )                   {box_mat = input;};
-		void SetBoxThickness( G4double input )             {box_thickness = input;};
-		void SetBoxInnerDimensions( G4ThreeVector input )  {box_inner_dimensions = input;};
-		void SetBoxColour( G4ThreeVector input )           {box_colour = input;};
-		void AddBox();
-		// Grid Functions
-		void SetGridMat( G4String input )                  {grid_mat = input;};
-		void SetGridSize( G4double input )                 {grid_size = input;};
-		void SetGridDimensions( G4ThreeVector input )      {grid_dimensions = input;};
-		void SetGridColour( G4ThreeVector input )          {grid_colour = input;};
-		void AddGrid();  
+//    void SetGenericTargetMaterial( G4String );
+//    void SetGenericTargetDimensions( G4ThreeVector );
+//    void SetGenericTargetPosition( G4ThreeVector );
+//    void SetGenericTarget( );
+//    void SetFieldBoxMaterial( G4String );
+//    void SetFieldBoxDimensions( G4ThreeVector );
+//    void SetFieldBoxPosition( G4ThreeVector );
+//    void SetFieldBoxMagneticField( G4ThreeVector );
+//    void SetFieldBox( );
 
-    void AddApparatusSpiceTargetChamber();
+//    void SetBoxMat( G4String input )                   {box_mat = input;};
+//        void SetBoxThickness( G4double input )             {box_thickness = input;};
+//        void SetBoxInnerDimensions( G4ThreeVector input )  {box_inner_dimensions = input;};
+//        void SetBoxColour( G4ThreeVector input )           {box_colour = input;};
+//        void AddBox();
+        // Grid Functions
+        void SetGridMat( G4String input )                  {grid_mat = input;};
+        void SetGridSize( G4double input )                 {grid_size = input;};
+        void SetGridDimensions( G4ThreeVector input )      {grid_dimensions = input;};
+        void SetGridColour( G4ThreeVector input )          {grid_colour = input;};
+        void AddGrid();
+
+//    void AddApparatusSpiceTargetChamber();
     void AddApparatus8piVacuumChamber();
     void AddApparatus8piVacuumChamberAuxMatShell(G4double thickness);
 
@@ -114,35 +112,47 @@ class DetectorConstruction : public G4VUserDetectorConstruction
 
     void UpdateGeometry();
 
-    void AddDetectionSystemGammaTracking(G4int ndet);
+//    void AddDetectionSystemGammaTracking(G4int ndet);
     void AddDetectionSystemSodiumIodide(G4int ndet);
-    void AddDetectionSystemLanthanumBromide(G4int ndet);
+    void AddDetectionSystemLanthanumBromide(G4ThreeVector input);
+    void AddDetectionSystemAncillaryBGO(G4ThreeVector input);
+
     void AddDetectionSystem8pi(G4int ndet);
+
     void AddDetectionSystem8piDetector(G4int ndet);
     void AddDetectionSystemGriffinForward(G4int ndet);
     void AddDetectionSystemGriffinForwardDetector(G4int ndet);
     void AddDetectionSystemGriffinBack(G4int ndet);
     void AddDetectionSystemGriffinBackDetector(G4int ndet);
     //void AddDetectionSystemGriffinPositionConfig(G4ThreeVector input);
-    void AddDetectionSystemGriffinHevimet( G4int input ) ; 
+    void AddDetectionSystemGriffinHevimet( G4int input ) ;
     void AddDetectionSystemGriffinCustom( G4int ndet ) ;
-    void AddDetectionSystemGriffinCustomDetector( G4int ndet ) ; 
+    void AddDetectionSystemGriffinCustomDetector( G4int ndet ) ;
     void AddDetectionSystemGriffinShieldSelect( G4int ShieldSelect ) ;
     void AddDetectionSystemGriffinSetRadialDistance( G4double detectorDist ) ;
     void AddDetectionSystemGriffinSetExtensionSuppLocation( G4int detectorPos ) ;
-    void AddDetectionSystemGriffinSetDeadLayer( G4ThreeVector params ) ; 
+    void AddDetectionSystemGriffinSetDeadLayer( G4ThreeVector params ) ;
 
     void AddDetectionSystemSceptar(G4int ndet);
     void AddDetectionSystemPaces(G4int ndet);
-    
-    void SetSpiceResolutionVariables(G4double intercept, G4double gain);
-    void AddDetectionSystemSpice(G4int nRings);
-    void AddDetectionSystemS3(G4int nRings);
+    void AddDetectionSystemSpice(G4int ndet);
+    void AddDetectionSystemSpiceV02(G4int ndet);
+
+    G4double GetLanthanumBromideCrystalRadius();
+    G4double GetLanthanumBromideCrystalLength();
+    G4double GetLanthanumBromideR();
+    G4double GetLanthanumBromideTheta(G4int i);
+    G4double GetLanthanumBromidePhi(G4int i);
+    G4double GetLanthanumBromideYaw(G4int i);
+    G4double GetLanthanumBromidePitch(G4int i);
+    G4double GetLanthanumBromideRoll(G4int i);
+    G4double GetLanthanumBromideCrystalRadialPosition();
+
 
     void UseTIGRESSPositions( G4bool input )                  {useTigressPositions = input;};
   private:
-  
-  	MagneticField* worldMagField;
+
+//    MagneticField* worldMagField;
 
     G4double  WorldSizeX;
     G4double  WorldSizeY;
@@ -152,20 +162,20 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     G4double  griffinFwdBackPosition;
     G4int     detectorShieldSelect ;
     G4double  detectorRadialDistance ;
-    G4int     extensionSuppressorLocation ; 
-    G4int     customDetectorNumber ; 
-    G4int     customDetectorPosition ; 
-    G4int     customDetectorVal ; 
-    G4int     hevimetSelector ; 
+    G4int     extensionSuppressorLocation ;
+    G4int     customDetectorNumber ;
+    G4int     customDetectorPosition ;
+    G4int     customDetectorVal ;
+    G4int     hevimetSelector ;
     G4bool    useTigressPositions;
-    
+
     // Box
     G4String           box_mat;
     G4double           box_thickness;
     G4ThreeVector      box_inner_dimensions;
     G4ThreeVector      box_colour;
 
-    G4Box*             solidWorld;    //pointer to the solid World 
+    G4Box*             solidWorld;    //pointer to the solid World
     G4LogicalVolume*   logicWorld;    //pointer to the logical World
     G4VPhysicalVolume* physiWorld;    //pointer to the physical World
 
@@ -196,13 +206,12 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     G4ThreeVector fieldBoxMagneticField;
 
     G4String matWorldName;
-    
-    G4double 			SpiceResolutionVariables[2];
-                 
+
     DetectorMessenger* detectorMessenger;
 
 };
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 #endif
+
 

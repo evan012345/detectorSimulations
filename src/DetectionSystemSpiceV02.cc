@@ -21,6 +21,8 @@
 
 #include "DetectionSystemSpiceV02.hh"
 
+#include "G4SystemOfUnits.hh" // new version geant4.10 requires units
+
 DetectionSystemSpiceV02::DetectionSystemSpiceV02() :
     // LogicalVolumes
     detector_casing_side_log(0),

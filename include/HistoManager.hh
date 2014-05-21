@@ -27,7 +27,7 @@
 /// \brief Definition of the HistoManager class
 //
 //
-// $Id$
+// $Id: HistoManager.hh 74272 2013-10-02 14:48:50Z gcosmo $
 // 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo...... 
@@ -41,14 +41,14 @@
 ////#include "g4xml.hh"
 ////#include "g4hbook.hh"
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+#include "G4SystemOfUnits.hh" // new version geant4.10 requires units
 
 const G4bool WRITEEKINHISTOS    = true;
 const G4bool WRITEEDEPHISTOS    = true;
 const G4bool WRITETRACKLHISTOS  = true;
 
 const G4int MAXHISTO            = 500;
-const G4int MAXNTCOL            = 10;
+const G4int MAXNTCOL            = 14;
 const G4int MAXNUMDET           = 20;
 const G4int MAXNUMDETGRIFFIN    = 16;
 const G4int MAXNUMCRYGRIFFIN    = 4;
@@ -72,6 +72,8 @@ const G4double  TRACKLXMAX  = 5000.5*mm;
 ///////////////////////////////////////////////////
 
 const G4double MINENERGYTHRES   = 0.001*keV;
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 enum HISTONAME
 {
@@ -346,6 +348,28 @@ enum HISTONAME
     labr_crystal_edep_det17,
     labr_crystal_edep_det18,
     labr_crystal_edep_det19,
+    ancillary_bgo_crystal_edep,
+    ancillary_bgo_crystal_edep_sum,
+    ancillary_bgo_crystal_edep_det0,
+    ancillary_bgo_crystal_edep_det1,
+    ancillary_bgo_crystal_edep_det2,
+    ancillary_bgo_crystal_edep_det3,
+    ancillary_bgo_crystal_edep_det4,
+    ancillary_bgo_crystal_edep_det5,
+    ancillary_bgo_crystal_edep_det6,
+    ancillary_bgo_crystal_edep_det7,
+    ancillary_bgo_crystal_edep_det8,
+    ancillary_bgo_crystal_edep_det9,
+    ancillary_bgo_crystal_edep_det10,
+    ancillary_bgo_crystal_edep_det11,
+    ancillary_bgo_crystal_edep_det12,
+    ancillary_bgo_crystal_edep_det13,
+    ancillary_bgo_crystal_edep_det14,
+    ancillary_bgo_crystal_edep_det15,
+    ancillary_bgo_crystal_edep_det16,
+    ancillary_bgo_crystal_edep_det17,
+    ancillary_bgo_crystal_edep_det18,
+    ancillary_bgo_crystal_edep_det19,
     sodiumIodide_crystal_edep,
     sodiumIodide_crystal_edep_sum,
     sodiumIodide_crystal_edep_det0,
@@ -368,29 +392,28 @@ enum HISTONAME
     sodiumIodide_crystal_edep_det17,
     sodiumIodide_crystal_edep_det18,
     sodiumIodide_crystal_edep_det19,
+    sceptar_edep,
     sceptar_edep_sum,
-    sceptar_square_edep,
-    sceptar_square_edep_det0,
-    sceptar_square_edep_det1,
-    sceptar_square_edep_det2,
-    sceptar_square_edep_det3,
-    sceptar_square_edep_det4,
-    sceptar_square_edep_det5,
-    sceptar_square_edep_det6,
-    sceptar_square_edep_det7,
-    sceptar_square_edep_det8,
-    sceptar_square_edep_det9,
-    sceptar_angled_edep,
-    sceptar_angled_edep_det0,
-    sceptar_angled_edep_det1,
-    sceptar_angled_edep_det2,
-    sceptar_angled_edep_det3,
-    sceptar_angled_edep_det4,
-    sceptar_angled_edep_det5,
-    sceptar_angled_edep_det6,
-    sceptar_angled_edep_det7,
-    sceptar_angled_edep_det8,
-    sceptar_angled_edep_det9,
+    sceptar_edep_det0,
+    sceptar_edep_det1,
+    sceptar_edep_det2,
+    sceptar_edep_det3,
+    sceptar_edep_det4,
+    sceptar_edep_det5,
+    sceptar_edep_det6,
+    sceptar_edep_det7,
+    sceptar_edep_det8,
+    sceptar_edep_det9,
+    sceptar_edep_det10,
+    sceptar_edep_det11,
+    sceptar_edep_det12,
+    sceptar_edep_det13,
+    sceptar_edep_det14,
+    sceptar_edep_det15,
+    sceptar_edep_det16,
+    sceptar_edep_det17,
+    sceptar_edep_det18,
+    sceptar_edep_det19,
     Eightpi_crystal_edep,
     Eightpi_crystal_edep_sum,
     Eightpi_crystal_edep_det0,
@@ -464,37 +487,42 @@ enum HISTONAME
 
 class HistoManager
 {
-  public:
+public:
 
-    HistoManager();
-   ~HistoManager();
+  HistoManager();
+ ~HistoManager();
 
-    void book();
-    void save();
+  void book();
+  void save();
 
-    void MakeHisto(G4AnalysisManager* analysisManager, G4String filename,  G4String title, G4double xmin, G4double xmax, G4int nbins);
-    void FillHisto(G4int ih, G4double e, G4double weight = 1.0);
-    void Normalize(G4int id, G4double fac);    
+  void MakeHisto(G4AnalysisManager* analysisManager, G4String filename,  G4String title, G4double xmin, G4double xmax, G4int nbins);
+  void FillHisto(G4int ih, G4double e, G4double weight = 1.0);
+  void Normalize(G4int id, G4double fac);
 
-    void FillNtuple(G4double eventNumber, G4double stepNumber, G4double cryNumber, G4double detNumber, G4double depEnergy, G4double posx, G4double posy, G4double posz, G4double time);
-    
-    void PrintStatistic();
+  void FillNtuple(G4double eventNumber, G4double stepNumber, G4double cryNumber, G4double detNumber, G4double depEnergy, G4double posx, G4double posy, G4double posz, G4double time);
+  void FillHitNtuple(G4int eventNumber, G4int trackID, G4int parentID, G4int stepNumber, G4int particleType, G4int processType, G4int systemID, G4int cryNumber, G4int detNumber, G4double depEnergy, G4double posx, G4double posy, G4double posz, G4double time);
 
-    G4bool GetStepTrackerBool() {return stepTrackerBool;};
+  void PrintStatistic();
 
-  private:
-    G4String G4intToG4String(G4int value);
+  G4bool GetStepTrackerBool() {return stepTrackerBool;};
+  G4bool GetHitTrackerBool() {return hitTrackerBool;};
 
-    G4bool        factoryOn;
-    G4int         makeHistoIndex;
+private:
+  G4String G4intToG4String(G4int value);
 
-    G4String      fileName[2];
+  G4bool        factoryOn;
+  G4int         makeHistoIndex;
 
-    G4int         fHistId[MAXHISTO];
-    G4AnaH1*      fHistPt[MAXHISTO];
-    G4int         fNtColId[MAXNTCOL];
+  G4String      fileName[2];
 
-    G4bool stepTrackerBool;
+  G4int         fHistId[MAXHISTO];
+  G4AnaH1*      fHistPt[MAXHISTO];
+  G4int         fNtColId[MAXNTCOL];
+  G4int         fNtColIdHit[MAXNTCOL];
+
+  G4bool stepTrackerBool;
+  G4bool hitTrackerBool;
+
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

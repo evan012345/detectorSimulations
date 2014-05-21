@@ -23,53 +23,34 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
+// $Id: ActionInitialization.hh 68058 2013-03-13 14:47:43Z gcosmo $
 //
-// $Id: PrimaryGeneratorMessenger.hh,v 1.1 2010-10-18 15:56:17 maire Exp $
-// GEANT4 tag $Name: geant4-09-04-patch-02 $
-//
-//
+/// \file ActionInitialization.hh
+/// \brief Definition of the ActionInitialization class
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+#ifndef ActionInitialization_h
+#define ActionInitialization_h 1
 
-#ifndef PrimaryGeneratorMessenger_h
-#define PrimaryGeneratorMessenger_h 1
+#include "G4VUserActionInitialization.hh"
 
-#include "G4UImessenger.hh"
-#include "globals.hh"
+class DetectorConstruction;
 
-class PrimaryGeneratorAction;
-class G4UIdirectory;
-class G4UIcmdWithADouble;
-class G4UIcmdWithADoubleAndUnit;
-class G4UIcmdWith3Vector;
-class G4UIcmdWith3VectorAndUnit;
-class G4UIcmdWithAString;
-class G4UIcommand;
-class G4UIcmdWithAnInteger;
-class G4UIcmdWithABool;
+/// Action initialization class.
+///
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-class PrimaryGeneratorMessenger: public G4UImessenger
+class ActionInitialization : public G4VUserActionInitialization
 {
   public:
-    PrimaryGeneratorMessenger(PrimaryGeneratorAction*);
-    virtual ~PrimaryGeneratorMessenger();
+    ActionInitialization(DetectorConstruction* detector);
+    virtual ~ActionInitialization();
 
-  public:
-    void SetNewValue(G4UIcommand*, G4String);
+    virtual void BuildForMaster() const;
+    virtual void Build() const;
 
   private:
-    PrimaryGeneratorAction*        Action;
-
-    G4UIcmdWithAnInteger*          numberOfDecayingLaBrDetectorsCmd;
-    G4UIcmdWithADoubleAndUnit*     efficiencyEnergyCmd;
-    G4UIcmdWith3Vector*            efficiencyDirectionCmd;
-
+    DetectorConstruction* fDetector;
 };
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 #endif
 
+    

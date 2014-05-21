@@ -21,6 +21,8 @@
 
 #include "DetectionSystemS3.hh"
 
+#include "G4SystemOfUnits.hh" // new version geant4.10 requires units
+
 DetectionSystemS3::DetectionSystemS3() :
   // LogicalVolumes
   S3InnerGuardRing_log(0),

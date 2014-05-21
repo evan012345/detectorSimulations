@@ -20,6 +20,9 @@
 
 #include "DetectionSystemLanthanumBromide.hh"
 
+#include "G4SystemOfUnits.hh" // new version geant4.10 requires units
+
+
 DetectionSystemLanthanumBromide::DetectionSystemLanthanumBromide() :
     // LogicalVolumes
     detector_volume_log(0),
@@ -204,7 +207,7 @@ G4double DetectionSystemLanthanumBromide::GetR()
 {
     // to crystal face
 
-    G4double position = 12.5*cm - (packing_front_lid_thickness + disc_front_lid_thickness + can_front_lid_thickness - can_back_lid_thickness);
+    G4double position = set_radial_pos - (packing_front_lid_thickness + disc_front_lid_thickness + can_front_lid_thickness - can_back_lid_thickness);
     return position;
 }
 
@@ -224,8 +227,29 @@ G4double DetectionSystemLanthanumBromide::GetPhi(G4int i)
     G4double phi    = this->detectorAngles[i][1];
     return phi;
 }
+G4double DetectionSystemLanthanumBromide::GetYaw(G4int i)
+{
+    // to crystal face
 
-G4int DetectionSystemLanthanumBromide::PlaceDetector(G4LogicalVolume* exp_hall_log, G4int detector_number)
+    G4double yaw    = this->detectorAngles[i][2];
+    return yaw;
+}
+G4double DetectionSystemLanthanumBromide::GetPitch(G4int i)
+{
+    // to crystal face
+
+    G4double pitch    = this->detectorAngles[i][3];
+    return pitch;
+}
+G4double DetectionSystemLanthanumBromide::GetRoll(G4int i)
+{
+    // to crystal face
+
+    G4double roll    = this->detectorAngles[i][4];
+    return roll;
+}
+
+G4int DetectionSystemLanthanumBromide::PlaceDetector(G4LogicalVolume* exp_hall_log, G4int detector_number, G4double radialpos)
 {
   G4int detector_copy_ID = 0;
 
@@ -233,7 +257,8 @@ G4int DetectionSystemLanthanumBromide::PlaceDetector(G4LogicalVolume* exp_hall_l
 
   G4int copy_number = detector_copy_ID + detector_number;
 
-  G4double position = 12.5*cm + ( this->can_length_z / 2.0 ) ;
+  G4double position = radialpos + can_front_lid_thickness +( this->can_length_z / 2.0 ) ;
+  set_radial_pos = radialpos;
 
   G4double theta  = this->detectorAngles[detector_number][0];
   G4double phi    = this->detectorAngles[detector_number][1];
@@ -298,7 +323,7 @@ G4int DetectionSystemLanthanumBromide::BuildAluminumCanVolume()
   }
 
   // Set visualization attributes
-  G4VisAttributes* vis_att = new G4VisAttributes(G4Colour(0.6,0.6,0.6));
+  G4VisAttributes* vis_att = new G4VisAttributes(G4Colour(0.55, 0.38, 1.0));
   vis_att->SetVisibility(true);
 
   G4ThreeVector direction =  G4ThreeVector(0,0,1);

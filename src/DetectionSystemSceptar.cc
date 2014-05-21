@@ -22,8 +22,10 @@
 
 #include "DetectionSystemSceptar.hh"
 
+#include "G4SystemOfUnits.hh" // new version geant4.10 requires units
+
 DetectionSystemSceptar::DetectionSystemSceptar() :
-    // LogicalVolumes 
+    // LogicalVolumes
     square_mylar_log(0),
     angled_mylar_log(0),
     square_scintillator_log(0),
@@ -31,41 +33,42 @@ DetectionSystemSceptar::DetectionSystemSceptar() :
     Delrin_shell_log(0),
     Delrin_shell2_log(0),
     Hevimet_shell_log(0)
-{ 
+{
 
   /////////////////////////////////////////////////////////////////////
-  // Detector Properties 
+  // Detector Properties
   /////////////////////////////////////////////////////////////////////
   this->separate_hemispheres = 1.0*mm;
   this->convert = 0.0254*m; //Needed to this->convert inches to meters
 
   this->square_scintillator_length = 1.194*this->convert;
   this->square_scintillator_width = 0.449*this->convert;
-  this->square_scintillator_thickness = this->convert/16.0; 
+  this->square_scintillator_thickness = this->convert/16.0;
   this->angled_scintillator_length  = 1.003*this->convert;
   this->angled_scintillator_long_width = 1.045*this->convert;
   this->angled_scintillator_short_width = 0.690*this->convert;
   this->angled_scintillator_thickness = this->convert/16.0;
-  this->mylar_thickness = 0.01*mm; 
+  this->mylar_thickness = 0.01*mm;
   this->scint_gap = 0.75*mm;
   this->scint_angle1 = 36.0*deg;
+  this->scint_angle_move = 18.0*deg;
 
-//*********This angle is the tapering along the length (10.05) 
-  this->scint_angle2 = atan((this->angled_scintillator_long_width -this->angled_scintillator_short_width)/(2.0*this->angled_scintillator_length));  
+//*********This angle is the tapering along the length (10.05)
+  this->scint_angle2 = atan((this->angled_scintillator_long_width -this->angled_scintillator_short_width)/(2.0*this->angled_scintillator_length));
 
 //*********This angle is the slight tapering of the sides (34.765))
-  this->scint_angle3 = acos(cos(this->scint_angle1)/cos(this->scint_angle2)); 
+  this->scint_angle3 = acos(cos(this->scint_angle1)/cos(this->scint_angle2));
 
 //%%%%% This is the angle that defines the packed
 //%%%%% configuration of the angled_scints
-//%%%%% 
+//%%%%%
   this->scint_angle4 = asin((this->angled_scintillator_long_width -this->angled_scintillator_short_width)/(2.0*this->angled_scintillator_length*tan(this->scint_angle1)));
 
 //%%%%% This is the radial distance from the center of the
 //%%%%% pentagon formed by the square_detectors to the
 //%%%%% center of any one of the square_detectors in that pentagon
 //%%%%% The gap between scintillators and the mylar coating are taken into account
-//%%%%% 
+//%%%%%
   this->square_scint_radial_distance = ((this->square_scintillator_length +2.0*this->mylar_thickness +this->scint_gap/cos(this->scint_angle1))*tan((M_PI/2.0)-this->scint_angle1)-(this->square_scintillator_thickness+2.0*this->mylar_thickness))/2.0;
 
 //%%%%% This is the radial distance from the axis of the
@@ -93,7 +96,7 @@ DetectionSystemSceptar::DetectionSystemSceptar() :
 
 DetectionSystemSceptar::~DetectionSystemSceptar()
 {
-    // LogicalVolumes 
+    // LogicalVolumes
     delete square_mylar_log;
     delete angled_mylar_log;
     delete square_scintillator_log;
@@ -104,7 +107,7 @@ DetectionSystemSceptar::~DetectionSystemSceptar()
 }
 
 G4int DetectionSystemSceptar::Build()
-{ 
+{
   // Build assembly volume
   G4AssemblyVolume* myAssembly = new G4AssemblyVolume();
   this->assembly = myAssembly;
@@ -140,40 +143,40 @@ G4int DetectionSystemSceptar::PlaceDetector(G4LogicalVolume* exp_hall_log, G4int
   rotate_square_scint1->rotateX(M_PI/2.0);
   rotate_square_scint1->rotateZ(M_PI/2.0);
   G4ThreeVector move_square_scint1(	-this->square_scint_radial_distance ,
-  														 			0,
-  														 			-(this->square_scintillator_width +extra + this->separate_hemispheres)/2.0);
+                                                                    0,
+                                                                    -(this->square_scintillator_width +extra + this->separate_hemispheres)/2.0);
 
   G4RotationMatrix* rotate_square_scint2 = new G4RotationMatrix;
   rotate_square_scint2->rotateY(-1.0*(2.0*this->scint_angle1));
   rotate_square_scint2->rotateX(M_PI/2.0);
   rotate_square_scint2->rotateZ(M_PI/2.0);
   G4ThreeVector move_square_scint2(	-this->square_scint_radial_distance*cos(2.0*this->scint_angle1),
-  																 	this->square_scint_radial_distance*sin(2.0*this->scint_angle1),
-  																 	-(this->square_scintillator_width +extra + this->separate_hemispheres) / 2.0 ) ;
+                                                                    this->square_scint_radial_distance*sin(2.0*this->scint_angle1),
+                                                                    -(this->square_scintillator_width +extra + this->separate_hemispheres) / 2.0 ) ;
 
   G4RotationMatrix* rotate_square_scint3 = new G4RotationMatrix;
   rotate_square_scint3->rotateY(-1.0*(M_PI -this->scint_angle1));
   rotate_square_scint3->rotateX(M_PI/2.0);
   rotate_square_scint3->rotateZ(M_PI/2.0);
-  G4ThreeVector move_square_scint3(	this->square_scint_radial_distance*cos(this->scint_angle1), 
-  																	this->square_scint_radial_distance*sin(this->scint_angle1), 
-  																	-(this->square_scintillator_width +extra + this->separate_hemispheres) / 2.0 ) ;
+  G4ThreeVector move_square_scint3(	this->square_scint_radial_distance*cos(this->scint_angle1),
+                                                                    this->square_scint_radial_distance*sin(this->scint_angle1),
+                                                                    -(this->square_scintillator_width +extra + this->separate_hemispheres) / 2.0 ) ;
 
   G4RotationMatrix* rotate_square_scint4 = new G4RotationMatrix;
   rotate_square_scint4->rotateY(-1.0*(this->scint_angle1 -M_PI));
   rotate_square_scint4->rotateX(M_PI/2.0);
   rotate_square_scint4->rotateZ(M_PI/2.0);
-  G4ThreeVector move_square_scint4(	this->square_scint_radial_distance*cos(this->scint_angle1), 
-  																	-this->square_scint_radial_distance*sin(this->scint_angle1), 
-  																	-(this->square_scintillator_width +extra + this->separate_hemispheres) / 2.0 ) ;
+  G4ThreeVector move_square_scint4(	this->square_scint_radial_distance*cos(this->scint_angle1),
+                                                                    -this->square_scint_radial_distance*sin(this->scint_angle1),
+                                                                    -(this->square_scintillator_width +extra + this->separate_hemispheres) / 2.0 ) ;
 
   G4RotationMatrix* rotate_square_scint5 = new G4RotationMatrix;
   rotate_square_scint5->rotateY(-1.0*(-2.0*this->scint_angle1));
   rotate_square_scint5->rotateX(M_PI/2.0);
   rotate_square_scint5->rotateZ(M_PI/2.0);
   G4ThreeVector move_square_scint5(	-this->square_scint_radial_distance*cos(2.0*this->scint_angle1),
-   																	-this->square_scint_radial_distance*sin(2.0*this->scint_angle1), 
-   																	-(this->square_scintillator_width +extra + this->separate_hemispheres) / 2.0 ) ;
+                                                                    -this->square_scint_radial_distance*sin(2.0*this->scint_angle1),
+                                                                    -(this->square_scintillator_width +extra + this->separate_hemispheres) / 2.0 ) ;
 
   G4RotationMatrix* rotate_square_scint6 = new G4RotationMatrix;
   rotate_square_scint6->rotateY(M_PI);
@@ -214,62 +217,62 @@ G4int DetectionSystemSceptar::PlaceDetector(G4LogicalVolume* exp_hall_log, G4int
   rotate_angled_scint1->rotateX(-1.0*(this->scint_angle4 -M_PI/2.0));
   rotate_angled_scint1->rotateX(M_PI/2.0);
   rotate_angled_scint1->rotateZ(M_PI/2.0);
-  G4ThreeVector move_angled_scint1(	-this->angled_scint_radial_distance, 
-  																	0, 
-  																	-this->angled_scint_move_back);    
+  G4ThreeVector move_angled_scint1(	-this->angled_scint_radial_distance,
+                                                                    0,
+                                                                    -this->angled_scint_move_back);
 
   G4RotationMatrix* rotate_angled_scint2 = new G4RotationMatrix;
   rotate_angled_scint2->rotateX(-1.0*(this->scint_angle4));
   rotate_angled_scint2->rotateZ(-1.0*(-2.0*this->scint_angle1));
   rotate_angled_scint2->rotateX(M_PI);
   rotate_angled_scint2->rotateZ(M_PI/2.0);
-  G4ThreeVector move_angled_scint2(	-this->angled_scint_radial_distance*cos(2.0*this->scint_angle1), 
-  																	this->angled_scint_radial_distance*sin(2.0*this->scint_angle1), 
-  																	-this->angled_scint_move_back);    
+  G4ThreeVector move_angled_scint2(	-this->angled_scint_radial_distance*cos(2.0*this->scint_angle1),
+                                                                    this->angled_scint_radial_distance*sin(2.0*this->scint_angle1),
+                                                                    -this->angled_scint_move_back);
 
   G4RotationMatrix* rotate_angled_scint3 = new G4RotationMatrix;
   rotate_angled_scint3->rotateX(-1.0*(this->scint_angle4));
   rotate_angled_scint3->rotateZ(-1.0*(this->scint_angle1 -M_PI));
   rotate_angled_scint3->rotateX(M_PI);
   rotate_angled_scint3->rotateZ(M_PI/2.0);
-  G4ThreeVector move_angled_scint3(	this->angled_scint_radial_distance*cos(this->scint_angle1), 
-  																	this->angled_scint_radial_distance*sin(this->scint_angle1), 
-  																	-this->angled_scint_move_back);    
+  G4ThreeVector move_angled_scint3(	this->angled_scint_radial_distance*cos(this->scint_angle1),
+                                                                    this->angled_scint_radial_distance*sin(this->scint_angle1),
+                                                                    -this->angled_scint_move_back);
 
   G4RotationMatrix* rotate_angled_scint4 = new G4RotationMatrix;
   rotate_angled_scint4->rotateX(-1.0*(this->scint_angle4));
   rotate_angled_scint4->rotateZ(-1.0*(M_PI -this->scint_angle1));
   rotate_angled_scint4->rotateX(M_PI);
   rotate_angled_scint4->rotateZ(M_PI/2.0);
-  G4ThreeVector move_angled_scint4(	this->angled_scint_radial_distance*cos(this->scint_angle1), 
-  																	-this->angled_scint_radial_distance*sin(this->scint_angle1), 
-  																	-this->angled_scint_move_back);  
+  G4ThreeVector move_angled_scint4(	this->angled_scint_radial_distance*cos(this->scint_angle1),
+                                                                    -this->angled_scint_radial_distance*sin(this->scint_angle1),
+                                                                    -this->angled_scint_move_back);
 
   G4RotationMatrix* rotate_angled_scint5 = new G4RotationMatrix;
   rotate_angled_scint5->rotateX(-1.0*(this->scint_angle4));
   rotate_angled_scint5->rotateZ(-1.0*(2.0*this->scint_angle1));
   rotate_angled_scint5->rotateX(M_PI);
   rotate_angled_scint5->rotateZ(M_PI/2.0);
-  G4ThreeVector move_angled_scint5(	-this->angled_scint_radial_distance*cos(2.0*this->scint_angle1), 
-  																	-this->angled_scint_radial_distance*sin(2.0*this->scint_angle1), 
-  																	-this->angled_scint_move_back);    
+  G4ThreeVector move_angled_scint5(	-this->angled_scint_radial_distance*cos(2.0*this->scint_angle1),
+                                                                    -this->angled_scint_radial_distance*sin(2.0*this->scint_angle1),
+                                                                    -this->angled_scint_move_back);
 
   G4RotationMatrix* rotate_angled_scint6 = new G4RotationMatrix;
-  rotate_angled_scint6->rotateX(-1.0*(this->scint_angle4 +M_PI/2.0));  
+  rotate_angled_scint6->rotateX(-1.0*(this->scint_angle4 +M_PI/2.0));
   rotate_angled_scint6->rotateX(M_PI/2.0);
   rotate_angled_scint6->rotateZ(M_PI/2.0);
   G4ThreeVector move_angled_scint6;
   move_angled_scint6 = -1.0*move_angled_scint1;
 
   G4RotationMatrix* rotate_angled_scint7 = new G4RotationMatrix;
-  rotate_angled_scint7->rotateX(-1.0*(this->scint_angle4));  
+  rotate_angled_scint7->rotateX(-1.0*(this->scint_angle4));
   rotate_angled_scint7->rotateZ(-1.0*(2.0*this->scint_angle1));
   rotate_angled_scint7->rotateZ(M_PI/2.0);
   G4ThreeVector move_angled_scint7;
   move_angled_scint7 = -1.0*move_angled_scint2;
 
   G4RotationMatrix* rotate_angled_scint8 = new G4RotationMatrix;
-  rotate_angled_scint8->rotateX(-1.0*(this->scint_angle4));  
+  rotate_angled_scint8->rotateX(-1.0*(this->scint_angle4));
   rotate_angled_scint8->rotateZ(-1.0*(M_PI -this->scint_angle1));
   rotate_angled_scint8->rotateZ(M_PI/2.0);
   G4ThreeVector move_angled_scint8;
@@ -283,7 +286,7 @@ G4int DetectionSystemSceptar::PlaceDetector(G4LogicalVolume* exp_hall_log, G4int
   move_angled_scint9 = -1.0*move_angled_scint4;
 
   G4RotationMatrix* rotate_angled_scint10 = new G4RotationMatrix;
-  rotate_angled_scint10->rotateX(-1.0*(this->scint_angle4));  
+  rotate_angled_scint10->rotateX(-1.0*(this->scint_angle4));
   rotate_angled_scint10->rotateZ(-1.0*(-2.0*this->scint_angle1));
   rotate_angled_scint10->rotateZ(M_PI/2.0);
   G4ThreeVector move_angled_scint10;
@@ -295,103 +298,145 @@ G4int DetectionSystemSceptar::PlaceDetector(G4LogicalVolume* exp_hall_log, G4int
     {
       rotate = rotate_square_scint6;
       move = move_square_scint6;
+      move.rotateZ(this->scint_angle_move);
+      rotate->rotateZ(this->scint_angle_move);
     }
     else if(detector_number == 1)
     {
       rotate = rotate_square_scint7;
       move = move_square_scint7;
+      move.rotateZ(this->scint_angle_move);
+      rotate->rotateZ(this->scint_angle_move);
     }
     else if(detector_number == 2)
     {
       rotate = rotate_square_scint8;
       move = move_square_scint8;
+      move.rotateZ(this->scint_angle_move);
+      rotate->rotateZ(this->scint_angle_move);
     }
     else if(detector_number == 3)
     {
       rotate = rotate_square_scint9;
       move = move_square_scint9;
+      move.rotateZ(this->scint_angle_move);
+      rotate->rotateZ(this->scint_angle_move);
     }
     else if(detector_number == 4)
     {
       rotate = rotate_square_scint10;
       move = move_square_scint10;
+      move.rotateZ(this->scint_angle_move);
+      rotate->rotateZ(this->scint_angle_move);
     }
     else if(detector_number == 5)
     {
       rotate = rotate_angled_scint6;
       move = move_angled_scint6;
+      move.rotateZ(this->scint_angle_move);
+      rotate->rotateZ(this->scint_angle_move);
     }
     else if(detector_number == 6)
     {
       rotate = rotate_angled_scint7;
       move = move_angled_scint7;
+      move.rotateZ(this->scint_angle_move);
+      rotate->rotateZ(this->scint_angle_move);
     }
     else if(detector_number == 7)
     {
       rotate = rotate_angled_scint8;
       move = move_angled_scint8;
+      move.rotateZ(this->scint_angle_move);
+      rotate->rotateZ(this->scint_angle_move);
     }
     else if(detector_number == 8)
     {
       rotate = rotate_angled_scint9;
       move = move_angled_scint9;
+      move.rotateZ(this->scint_angle_move);
+      rotate->rotateZ(this->scint_angle_move);
     }
     else if(detector_number == 9)
     {
       rotate = rotate_angled_scint10;
       move = move_angled_scint10;
+      move.rotateZ(this->scint_angle_move);
+      rotate->rotateZ(this->scint_angle_move);
     }
 
     else if(detector_number == 10)
     {
       rotate = rotate_square_scint1;
       move = move_square_scint1;
+      move.rotateZ(this->scint_angle_move+this->scint_angle1);
+      rotate->rotateZ(this->scint_angle_move+this->scint_angle1);
     }
     else if(detector_number == 11)
     {
       rotate = rotate_square_scint2;
       move = move_square_scint2;
+      move.rotateZ(this->scint_angle_move+this->scint_angle1);
+      rotate->rotateZ(this->scint_angle_move+this->scint_angle1);
     }
     else if(detector_number == 12)
     {
       rotate = rotate_square_scint3;
       move = move_square_scint3;
+      move.rotateZ(this->scint_angle_move+this->scint_angle1);
+      rotate->rotateZ(this->scint_angle_move+this->scint_angle1);
     }
     else if(detector_number == 13)
     {
       rotate = rotate_square_scint4;
       move = move_square_scint4;
+      move.rotateZ(this->scint_angle_move+this->scint_angle1);
+      rotate->rotateZ(this->scint_angle_move+this->scint_angle1);
     }
     else if(detector_number == 14)
     {
       rotate = rotate_square_scint5;
       move = move_square_scint5;
+      move.rotateZ(this->scint_angle_move+this->scint_angle1);
+      rotate->rotateZ(this->scint_angle_move+this->scint_angle1);
     }
     else if(detector_number == 15)
     {
       rotate = rotate_angled_scint1;
       move = move_angled_scint1;
+      move.rotateZ(this->scint_angle_move+this->scint_angle1);
+      rotate->rotateZ(this->scint_angle_move+this->scint_angle1);
     }
     else if(detector_number == 16)
     {
       rotate = rotate_angled_scint2;
       move = move_angled_scint2;
+      move.rotateZ(this->scint_angle_move+this->scint_angle1);
+      rotate->rotateZ(this->scint_angle_move+this->scint_angle1);
     }
     else if(detector_number == 17)
     {
       rotate = rotate_angled_scint3;
       move = move_angled_scint3;
+      move.rotateZ(this->scint_angle_move+this->scint_angle1);
+      rotate->rotateZ(this->scint_angle_move+this->scint_angle1);
     }
     else if(detector_number == 18)
     {
       rotate = rotate_angled_scint4;
       move = move_angled_scint4;
+      move.rotateZ(this->scint_angle_move+this->scint_angle1);
+      rotate->rotateZ(this->scint_angle_move+this->scint_angle1);
     }
     else if(detector_number == 19)
     {
       rotate = rotate_angled_scint5;
       move = move_angled_scint5;
+      move.rotateZ(this->scint_angle_move+this->scint_angle1);
+      rotate->rotateZ(this->scint_angle_move+this->scint_angle1);
     }
+
+
 
     if( (detector_number < 5) || (detector_number >= 10 && detector_number < 15) )
     {
@@ -428,7 +473,7 @@ G4int DetectionSystemSceptar::ConstructScintillator()
   G4VisAttributes* scintillator_vis_att = new G4VisAttributes(G4Colour(0.0,0.3,0.7));
   scintillator_vis_att->SetVisibility(true);
   G4VisAttributes* mylar_vis_att = new G4VisAttributes(G4Colour(0.6,0.6,0.6));
-  mylar_vis_att->SetVisibility(true);     
+  mylar_vis_att->SetVisibility(true);
 
   G4double extra = 2.0*this->mylar_thickness;
 
@@ -588,7 +633,7 @@ G4int DetectionSystemSceptar::ConstructScintillator()
 //  G4RotationMatrix* rotate_angled_scint1 = new G4RotationMatrix;
 //  rotate_angled_scint1->rotateX(-1.0*(this->scint_angle4 -M_PI/2.0));
 
-//  G4ThreeVector move_angled_scint1(0, -this->angled_scint_move_back, -this->angled_scint_radial_distance);    
+//  G4ThreeVector move_angled_scint1(0, -this->angled_scint_move_back, -this->angled_scint_radial_distance);
 
 //  this->assemblyAngled->AddPlacedVolume(angled_mylar_log, move_angled_scint1, rotate_angled_scint1);
 ////  this->assemblyAngledSD->AddPlacedVolume(angled_scintillator_log, move_angled_scint1, rotate_angled_scint1);
@@ -598,7 +643,7 @@ G4int DetectionSystemSceptar::ConstructScintillator()
 //  rotate_angled_scint2->rotateZ(-1.0*(-2.0*this->scint_angle1));
 //  rotate_angled_scint2->rotateX(-1.0*(-M_PI/2.0));
 
-//  G4ThreeVector move_angled_scint2(this->angled_scint_radial_distance*sin(2.0*this->scint_angle1), -this->angled_scint_move_back, -this->angled_scint_radial_distance*cos(2.0*this->scint_angle1));    
+//  G4ThreeVector move_angled_scint2(this->angled_scint_radial_distance*sin(2.0*this->scint_angle1), -this->angled_scint_move_back, -this->angled_scint_radial_distance*cos(2.0*this->scint_angle1));
 
 //  this->assemblyAngled->AddPlacedVolume(angled_mylar_log, move_angled_scint2, rotate_angled_scint2);
 ////  this->assemblyAngledSD->AddPlacedVolume(angled_scintillator_log, move_angled_scint2, rotate_angled_scint2);
@@ -608,7 +653,7 @@ G4int DetectionSystemSceptar::ConstructScintillator()
 //  rotate_angled_scint3->rotateZ(-1.0*(this->scint_angle1 -M_PI));
 //  rotate_angled_scint3->rotateX(-1.0*(-M_PI/2.0));
 
-//  G4ThreeVector move_angled_scint3(this->angled_scint_radial_distance*sin(this->scint_angle1), -this->angled_scint_move_back, this->angled_scint_radial_distance*cos(this->scint_angle1));    
+//  G4ThreeVector move_angled_scint3(this->angled_scint_radial_distance*sin(this->scint_angle1), -this->angled_scint_move_back, this->angled_scint_radial_distance*cos(this->scint_angle1));
 
 //  this->assemblyAngled->AddPlacedVolume(angled_mylar_log, move_angled_scint3, rotate_angled_scint3);
 ////  this->assemblyAngledSD->AddPlacedVolume(angled_scintillator_log, move_angled_scint3, rotate_angled_scint3);
@@ -618,7 +663,7 @@ G4int DetectionSystemSceptar::ConstructScintillator()
 //  rotate_angled_scint4->rotateZ(-1.0*(M_PI -this->scint_angle1));
 //  rotate_angled_scint4->rotateX(-1.0*(-M_PI/2.0));
 
-//  G4ThreeVector move_angled_scint4(-this->angled_scint_radial_distance*sin(this->scint_angle1), -this->angled_scint_move_back, this->angled_scint_radial_distance*cos(this->scint_angle1));  
+//  G4ThreeVector move_angled_scint4(-this->angled_scint_radial_distance*sin(this->scint_angle1), -this->angled_scint_move_back, this->angled_scint_radial_distance*cos(this->scint_angle1));
 
 //  this->assemblyAngled->AddPlacedVolume(angled_mylar_log, move_angled_scint4, rotate_angled_scint4);
 ////  this->assemblyAngledSD->AddPlacedVolume(angled_scintillator_log, move_angled_scint4, rotate_angled_scint4);
@@ -628,7 +673,7 @@ G4int DetectionSystemSceptar::ConstructScintillator()
 //  rotate_angled_scint5->rotateZ(-1.0*(2.0*this->scint_angle1));
 //  rotate_angled_scint5->rotateX(-1.0*(-M_PI/2.0));
 
-//  G4ThreeVector move_angled_scint5(-this->angled_scint_radial_distance*sin(2.0*this->scint_angle1), -this->angled_scint_move_back, -this->angled_scint_radial_distance*cos(2.0*this->scint_angle1));    
+//  G4ThreeVector move_angled_scint5(-this->angled_scint_radial_distance*sin(2.0*this->scint_angle1), -this->angled_scint_move_back, -this->angled_scint_radial_distance*cos(2.0*this->scint_angle1));
 
 //  this->assemblyAngled->AddPlacedVolume(angled_mylar_log, move_angled_scint5, rotate_angled_scint5);
 ////  this->assemblyAngledSD->AddPlacedVolume(angled_scintillator_log, move_angled_scint5, rotate_angled_scint5);
@@ -639,7 +684,7 @@ G4int DetectionSystemSceptar::ConstructScintillator()
 //  //~o0o~~o0o~~o0o~~o0o~~o0o~~o0o~~o0o~~o0o~~o0o~~o0o~~o0o~~o0o~~o0o~~o0o~~o0o~~o0o~~o0o~~o0o~~o0o~
 
 //  G4RotationMatrix* rotate_angled_scint6 = new G4RotationMatrix;
-//  rotate_angled_scint6->rotateX(-1.0*(this->scint_angle4 +M_PI/2.0));  
+//  rotate_angled_scint6->rotateX(-1.0*(this->scint_angle4 +M_PI/2.0));
 
 //  move_new = -1.0*move_angled_scint1;
 
@@ -647,7 +692,7 @@ G4int DetectionSystemSceptar::ConstructScintillator()
 ////  this->assemblyAngledSD->AddPlacedVolume(angled_scintillator_log, move_new, rotate_angled_scint6);
 
 //  G4RotationMatrix* rotate_angled_scint7 = new G4RotationMatrix;
-//  rotate_angled_scint7->rotateX(-1.0*(this->scint_angle4));  
+//  rotate_angled_scint7->rotateX(-1.0*(this->scint_angle4));
 //  rotate_angled_scint7->rotateZ(-1.0*(2.0*this->scint_angle1));
 //  rotate_angled_scint7->rotateX(-1.0*(M_PI/2.0));
 
@@ -657,7 +702,7 @@ G4int DetectionSystemSceptar::ConstructScintillator()
 ////  this->assemblyAngledSD->AddPlacedVolume(angled_scintillator_log, move_new, rotate_angled_scint7);
 
 //  G4RotationMatrix* rotate_angled_scint8 = new G4RotationMatrix;
-//  rotate_angled_scint8->rotateX(-1.0*(this->scint_angle4));  
+//  rotate_angled_scint8->rotateX(-1.0*(this->scint_angle4));
 //  rotate_angled_scint8->rotateZ(-1.0*(M_PI -this->scint_angle1));
 //  rotate_angled_scint8->rotateX(-1.0*(M_PI/2.0));
 
@@ -677,7 +722,7 @@ G4int DetectionSystemSceptar::ConstructScintillator()
 ////  this->assemblyAngledSD->AddPlacedVolume(angled_scintillator_log, move_new, rotate_angled_scint9);
 
 //  G4RotationMatrix* rotate_angled_scint10 = new G4RotationMatrix;
-//  rotate_angled_scint10->rotateX(-1.0*(this->scint_angle4));  
+//  rotate_angled_scint10->rotateX(-1.0*(this->scint_angle4));
 //  rotate_angled_scint10->rotateZ(-1.0*(-2.0*this->scint_angle1));
 //  rotate_angled_scint10->rotateX(-1.0*(M_PI/2.0));
 
@@ -790,20 +835,20 @@ G4int DetectionSystemSceptar::ConstructHevimetShell()
 //    G4cout << " ----> Material " << this->vacuum_material << " not found, cannot build the detector shell! " << G4endl;
 //    return 0;
 //  }
-// 
+//
 //  // Set visualization attributes
 //  G4VisAttributes* vis_att = new G4VisAttributes(G4Colour(0.1,0.0,0.9));
 //  vis_att->SetVisibility(true);
 
 //  G4ThreeVector direction =  G4ThreeVector(0,0,1);
 //  G4double z_position;
-//  G4ThreeVector move; 
+//  G4ThreeVector move;
 //  G4RotationMatrix* rotate = new G4RotationMatrix;
 
 //  /////////////////////////////////////////////////////////////////////
 //  // Build and Place Vacuum Can
 //  /////////////////////////////////////////////////////////////////////
-//  G4Tubs* can_vacuum_cylinder = BuildCanVacuum(); 
+//  G4Tubs* can_vacuum_cylinder = BuildCanVacuum();
 
 //  // Define rotation and movement objects
 //  z_position	= ( (can_back_lid_thickness + crystal_dist_from_can_back) - (can_front_lid_thickness + crystal_dist_from_can_face) )/2.0;
@@ -815,13 +860,13 @@ G4int DetectionSystemSceptar::ConstructHevimetShell()
 //    can_vacuum_cylinder_log = new G4LogicalVolume(can_vacuum_cylinder, material, "can_vacuum_cylinder_log", 0, 0, 0);
 //    can_vacuum_cylinder_log->SetVisAttributes(vis_att);
 //  }
-//	  
+//
 //  // add physical can cylinder
-//  this->assembly->AddPlacedVolume(can_vacuum_cylinder_log, move, rotate); 
-//        
+//  this->assembly->AddPlacedVolume(can_vacuum_cylinder_log, move, rotate);
+//
 //  /////////////////////////////////////////////////////////////////////
 //  // Build and Place Vacuum Front Lid
-//  /////////////////////////////////////////////////////////////////////  
+//  /////////////////////////////////////////////////////////////////////
 //  G4Tubs* can_vacuum_front_lid = BuildCanVacuumFrontLid();
 
 //  // logical volume
@@ -834,10 +879,10 @@ G4int DetectionSystemSceptar::ConstructHevimetShell()
 //  // place can vacuum front lid
 //  z_position 	= (can_length_z/2.0) - (can_front_lid_thickness) - (crystal_dist_from_can_face/2.0);
 //  move 		= z_position * direction;
-//  
+//
 //  // add physical BACK outer_can_lid
-//  this->assembly->AddPlacedVolume(can_vacuum_front_lid_log, move, rotate); 
-//  
+//  this->assembly->AddPlacedVolume(can_vacuum_front_lid_log, move, rotate);
+//
 //  /////////////////////////////////////////////////////////////////////
 //  // Build and Place Vacuum Back Lid
 //  /////////////////////////////////////////////////////////////////////
@@ -853,10 +898,10 @@ G4int DetectionSystemSceptar::ConstructHevimetShell()
 //  // place can vacuum front lid
 //  z_position 	= - (can_length_z/2.0) + (can_back_lid_thickness) + (crystal_dist_from_can_back/2.0);
 //  move 		= z_position * direction;
-//  
+//
 //  // add physical BACK outer_can_lid
-//  this->assembly->AddPlacedVolume(can_vacuum_back_lid_log, move, rotate); 
-//  
+//  this->assembly->AddPlacedVolume(can_vacuum_back_lid_log, move, rotate);
+//
 //  return 1;
 //}//end ::BuildCanVacuumVolume
 
@@ -867,7 +912,7 @@ G4Trd* DetectionSystemSceptar::squareMylar()
 {
   G4double extra = 2.0*this->mylar_thickness;
 
-  G4double half_length_longer_x = (this->square_scintillator_length +extra)/2.0; 
+  G4double half_length_longer_x = (this->square_scintillator_length +extra)/2.0;
   G4double half_length_shorter_x = half_length_longer_x - tan(this->scint_angle1)*(this->square_scintillator_thickness +extra);
   G4double half_length_y = (this->square_scintillator_width +extra)/2.0;
   G4double half_length_z = (this->square_scintillator_thickness +extra)/2.0;
@@ -881,7 +926,7 @@ G4SubtractionSolid* DetectionSystemSceptar::squareMylarWithCut()
 {
   G4double extra = 2.0*this->mylar_thickness;
 
-  G4double half_length_longer_x = (this->square_scintillator_length +extra)/2.0; 
+  G4double half_length_longer_x = (this->square_scintillator_length +extra)/2.0;
   G4double half_length_shorter_x = half_length_longer_x - tan(this->scint_angle1)*(this->square_scintillator_thickness +extra);
   G4double half_length_y = (this->square_scintillator_width +extra)/2.0;
   G4double half_length_z = (this->square_scintillator_thickness +extra)/2.0;
@@ -903,7 +948,7 @@ G4SubtractionSolid* DetectionSystemSceptar::angledMylar()
   G4double extra = 2.0*this->mylar_thickness;
 
   G4double half_length_neg_x = (this->angled_scintillator_long_width +extra)/2.0;
-  G4double half_length_pos_x = (this->angled_scintillator_short_width +extra)/2.0;    
+  G4double half_length_pos_x = (this->angled_scintillator_short_width +extra)/2.0;
   G4double half_length_z = (this->angled_scintillator_length +extra)/2.0;
   G4double half_length_y = (this->angled_scintillator_thickness +extra)/2.0;
 
@@ -915,7 +960,7 @@ G4SubtractionSolid* DetectionSystemSceptar::angledMylar()
   G4Box* box = new G4Box("box", half_thickness, half_thickness, half_length);
 
   G4RotationMatrix* rotate_box1 = new G4RotationMatrix;
-  rotate_box1->rotateY(this->scint_angle2); 
+  rotate_box1->rotateY(this->scint_angle2);
   rotate_box1->rotateZ(-this->scint_angle3);
 
   G4ThreeVector move_box1((this->angled_scintillator_short_width +extra +tan(this->scint_angle2)*(this->angled_scintillator_length +extra) -tan(this->scint_angle3)*(this->angled_scintillator_thickness +extra)/cos(this->scint_angle2))/2.0 +cos(this->scint_angle3)*half_thickness/cos(this->scint_angle2), half_thickness*sin(this->scint_angle3), 0);
@@ -923,8 +968,8 @@ G4SubtractionSolid* DetectionSystemSceptar::angledMylar()
   G4SubtractionSolid* angled_mylar1 = new G4SubtractionSolid("angled_mylar1", mylar, box, rotate_box1, move_box1);
 
   G4RotationMatrix* rotate_box2 = new G4RotationMatrix;
-  rotate_box2->rotateY(-this->scint_angle2); 
-  rotate_box2->rotateZ(this->scint_angle3); 
+  rotate_box2->rotateY(-this->scint_angle2);
+  rotate_box2->rotateZ(this->scint_angle3);
 
   G4ThreeVector move_box2(-(this->angled_scintillator_short_width +extra +tan(this->scint_angle2)*(this->angled_scintillator_length +extra) -tan(this->scint_angle3)*(this->angled_scintillator_thickness +extra)/cos(this->scint_angle2))/2.0 -cos(this->scint_angle3)*half_thickness/cos(this->scint_angle2), half_thickness*sin(this->scint_angle3), 0);
 
@@ -940,7 +985,7 @@ G4SubtractionSolid* DetectionSystemSceptar::angledMylarWithCut()
   G4double extra = 2.0*this->mylar_thickness;
 
   G4double half_length_neg_x = (this->angled_scintillator_long_width +extra)/2.0;
-  G4double half_length_pos_x = (this->angled_scintillator_short_width +extra)/2.0;    
+  G4double half_length_pos_x = (this->angled_scintillator_short_width +extra)/2.0;
   G4double half_length_z = (this->angled_scintillator_length +extra)/2.0;
   G4double half_length_y = (this->angled_scintillator_thickness +extra)/2.0;
 
@@ -952,7 +997,7 @@ G4SubtractionSolid* DetectionSystemSceptar::angledMylarWithCut()
   G4Box* box = new G4Box("box", half_thickness, half_thickness, half_length);
 
   G4RotationMatrix* rotate_box1 = new G4RotationMatrix;
-  rotate_box1->rotateY(this->scint_angle2); 
+  rotate_box1->rotateY(this->scint_angle2);
   rotate_box1->rotateZ(-this->scint_angle3);
 
   G4ThreeVector move_box1((this->angled_scintillator_short_width +extra +tan(this->scint_angle2)*(this->angled_scintillator_length +extra) -tan(this->scint_angle3)*(this->angled_scintillator_thickness +extra)/cos(this->scint_angle2))/2.0 +cos(this->scint_angle3)*half_thickness/cos(this->scint_angle2), half_thickness*sin(this->scint_angle3), 0);
@@ -960,8 +1005,8 @@ G4SubtractionSolid* DetectionSystemSceptar::angledMylarWithCut()
   G4SubtractionSolid* angled_mylar1 = new G4SubtractionSolid("angled_mylar1", mylar, box, rotate_box1, move_box1);
 
   G4RotationMatrix* rotate_box2 = new G4RotationMatrix;
-  rotate_box2->rotateY(-this->scint_angle2); 
-  rotate_box2->rotateZ(this->scint_angle3); 
+  rotate_box2->rotateY(-this->scint_angle2);
+  rotate_box2->rotateZ(this->scint_angle3);
 
   G4ThreeVector move_box2(-(this->angled_scintillator_short_width +extra +tan(this->scint_angle2)*(this->angled_scintillator_length +extra) -tan(this->scint_angle3)*(this->angled_scintillator_thickness +extra)/cos(this->scint_angle2))/2.0 -cos(this->scint_angle3)*half_thickness/cos(this->scint_angle2), half_thickness*sin(this->scint_angle3), 0);
 
@@ -981,7 +1026,7 @@ G4SubtractionSolid* DetectionSystemSceptar::angledMylarWithCut()
 
 G4Trd* DetectionSystemSceptar::squareScintillator()
 {
-  G4double half_length_longer_x = this->square_scintillator_length/2.0; 
+  G4double half_length_longer_x = this->square_scintillator_length/2.0;
   G4double half_length_shorter_x = half_length_longer_x - tan(this->scint_angle1)*this->square_scintillator_thickness;
   G4double half_length_y = this->square_scintillator_width/2.0;
   G4double half_length_z = this->square_scintillator_thickness/2.0;
@@ -995,7 +1040,7 @@ G4Trd* DetectionSystemSceptar::squareScintillator()
 G4SubtractionSolid* DetectionSystemSceptar::angledScintillator()
 {
   G4double half_length_neg_x = this->angled_scintillator_long_width/2.0;
-  G4double half_length_pos_x = this->angled_scintillator_short_width/2.0;    
+  G4double half_length_pos_x = this->angled_scintillator_short_width/2.0;
   G4double half_length_z = this->angled_scintillator_length/2.0;
   G4double half_length_y = this->angled_scintillator_thickness/2.0;
 
@@ -1007,7 +1052,7 @@ G4SubtractionSolid* DetectionSystemSceptar::angledScintillator()
   G4Box* box = new G4Box("box", half_thickness, half_thickness, half_length);
 
   G4RotationMatrix* rotate_box1 = new G4RotationMatrix;
-  rotate_box1->rotateY(this->scint_angle2); 
+  rotate_box1->rotateY(this->scint_angle2);
   rotate_box1->rotateZ(-this->scint_angle3);
 
   G4ThreeVector move_box1((this->angled_scintillator_short_width +tan(this->scint_angle2)*this->angled_scintillator_length -tan(this->scint_angle3)*this->angled_scintillator_thickness/cos(this->scint_angle2))/2.0 +cos(this->scint_angle3)*half_thickness/cos(this->scint_angle2), half_thickness*sin(this->scint_angle3), 0);
@@ -1015,8 +1060,8 @@ G4SubtractionSolid* DetectionSystemSceptar::angledScintillator()
   G4SubtractionSolid* angled_scint1 = new G4SubtractionSolid("angled_scint1", scint, box, rotate_box1, move_box1);
 
   G4RotationMatrix* rotate_box2 = new G4RotationMatrix;
-  rotate_box2->rotateY(-this->scint_angle2); 
-  rotate_box2->rotateZ(this->scint_angle3); 
+  rotate_box2->rotateY(-this->scint_angle2);
+  rotate_box2->rotateZ(this->scint_angle3);
 
   G4ThreeVector move_box2(-(this->angled_scintillator_short_width +tan(this->scint_angle2)*this->angled_scintillator_length -tan(this->scint_angle3)*this->angled_scintillator_thickness/cos(this->scint_angle2))/2.0 -cos(this->scint_angle3)*half_thickness/cos(this->scint_angle2), half_thickness*sin(this->scint_angle3), 0);
 

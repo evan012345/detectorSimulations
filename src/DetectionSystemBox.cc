@@ -18,6 +18,8 @@
 
 #include "DetectionSystemBox.hh"
 
+#include "G4SystemOfUnits.hh" // new version geant4.10 requires units
+
 DetectionSystemBox::DetectionSystemBox(G4double x_length_in, G4double y_length_in, G4double z_length_in, G4double thickness_in, G4String box_mat, G4ThreeVector box_colour) :
     // LogicalVolumes 
     cell_log(0),

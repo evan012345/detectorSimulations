@@ -22,6 +22,8 @@
 
 #include "DetectionSystem8pi.hh"
 
+#include "G4SystemOfUnits.hh" // new version geant4.10 requires units
+
 //constructor suppressed
 
 DetectionSystem8pi::~DetectionSystem8pi()

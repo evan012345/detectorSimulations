@@ -23,6 +23,8 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
+// $Id: PhysicsList.cc 73290 2013-08-23 10:04:20Z gcosmo $
+//
 /// \file radioactivedecay/rdecay02/src/PhysicsList.cc
 /// \brief Implementation of the PhysicsList class
 //
@@ -33,10 +35,12 @@
 
 #include "PhysListParticles.hh"
 #include "G4EmStandardPhysics.hh"
-#include "PhysListEmLowEnergy.hh"
+#include "G4EmStandardPhysics_option4.hh"
+#include "G4EmLivermorePhysics.hh"
+#include "G4EmPenelopePhysics.hh"
 #include "PhysListHadron.hh"
-//#include "G4RegionStore.hh"
-//#include "G4Region.hh"
+#include "G4RegionStore.hh"
+#include "G4Region.hh"
 #include "G4ProductionCuts.hh"
 #include "G4ProcessManager.hh"
 #include "G4ParticleTypes.hh"
@@ -49,13 +53,14 @@
 #include "G4UnitsTable.hh"
 #include "G4LossTableManager.hh"
 
-#include "HadronPhysicsQGSP_BERT.hh"
-#include "HadronPhysicsQGSP_BIC.hh"
-#include "HadronPhysicsQGSP_BERT_HP.hh"
-#include "HadronPhysicsQGSP_BIC_HP.hh"
+#include "G4HadronPhysicsQGSP_BERT.hh"
+#include "G4HadronPhysicsQGSP_BIC.hh"
+#include "G4HadronPhysicsQGSP_BERT_HP.hh"
+#include "G4HadronPhysicsQGSP_BIC_HP.hh"
 
 #include "G4EmExtraPhysics.hh"
 #include "G4HadronElasticPhysics.hh"
+#include "G4HadronElasticPhysicsHP.hh"
 #include "G4StoppingPhysics.hh"
 #include "G4IonBinaryCascadePhysics.hh"
 #include "G4RadioactiveDecayPhysics.hh"
@@ -69,8 +74,13 @@
 PhysicsList::PhysicsList() :
  G4VModularPhysicsList(),
  fCutForGamma(0.01*mm), fCutForElectron(0.01*mm),
- fCutForPositron(0.01*mm), fHadPhysicsList(0),
- fNhadcomp(0)//,fDetectorCuts(0), fTargetCuts(0)
+ fCutForPositron(0.01*mm),
+ fEmPhysicsList(0),
+ fRaddecayList(0),
+ fParticleList(0),
+ fHadPhysicsList(0),
+ fNhadcomp(0),
+ fPMessenger(0),fDetectorCuts(0), fTargetCuts(0)
 {
   G4LossTableManager::Instance();
   defaultCutValue =0.01*mm;
@@ -87,9 +97,6 @@ PhysicsList::PhysicsList() :
 
   // EM physics
   fEmPhysicsList = new G4EmStandardPhysics();
-  
-
-
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -147,22 +154,28 @@ void PhysicsList::SelectPhysicsList(const G4String& name)
     fHadPhysicsList = new PhysListHadron("hadron");
   } else if (name == "QGSP_BERT") {
     AddExtraBuilders(false);
-    fHadPhysicsList = new HadronPhysicsQGSP_BERT("std-hadron");
+    fHadPhysicsList = new G4HadronPhysicsQGSP_BERT(verboseLevel);
   } else if (name == "QGSP_BIC" && !fHadPhysicsList) {
     AddExtraBuilders(false);
-    fHadPhysicsList = new HadronPhysicsQGSP_BIC("std-hadron");
+    fHadPhysicsList = new G4HadronPhysicsQGSP_BIC(verboseLevel);
   } else if (name == "QGSP_BERT_HP"  && !fHadPhysicsList) {
     AddExtraBuilders(true);
-    fHadPhysicsList = new HadronPhysicsQGSP_BERT_HP("std-hadron");
+    fHadPhysicsList = new G4HadronPhysicsQGSP_BERT_HP(verboseLevel);
   } else if (name == "QGSP_BIC_HP"  && !fHadPhysicsList) {
     AddExtraBuilders(true);
-    fHadPhysicsList = new HadronPhysicsQGSP_BIC_HP("std-hadron");
-  } else if (name == "LowEnergy_EM") {
+    fHadPhysicsList = new G4HadronPhysicsQGSP_BIC_HP(verboseLevel);
+  } else if (name == "emlivermore") {
       delete fEmPhysicsList;
-      fEmPhysicsList = new PhysListEmLowEnergy("lowe-em");
-  } else if (name == "Standard_EM") {
+      fEmPhysicsList = new G4EmLivermorePhysics(verboseLevel);
+  } else if (name == "empenelope") {
       delete fEmPhysicsList;
-      fEmPhysicsList = new G4EmStandardPhysics();
+      fEmPhysicsList = new G4EmPenelopePhysics(verboseLevel);
+  } else if (name == "emstandard") {
+      delete fEmPhysicsList;
+      fEmPhysicsList = new G4EmStandardPhysics(verboseLevel);
+  } else if (name == "emstandard_opt4") {
+      delete fEmPhysicsList;
+      fEmPhysicsList = new G4EmStandardPhysics_option4(verboseLevel);
   } else {
       G4cout << "PhysicsList WARNING wrong or unkonwn <"
              << name << "> Physics " << G4endl;
@@ -174,12 +187,15 @@ void PhysicsList::SelectPhysicsList(const G4String& name)
 void PhysicsList::AddExtraBuilders(G4bool flagHP)
 {
   fNhadcomp = 5;
-  fHadronPhys.push_back( new G4EmExtraPhysics("extra EM"));
-  fHadronPhys.push_back( new G4HadronElasticPhysics("elastic",verboseLevel,
-                                                   flagHP));
-  fHadronPhys.push_back( new G4StoppingPhysics("stopping",verboseLevel));
-  fHadronPhys.push_back( new G4IonBinaryCascadePhysics("ionBIC"));
-  fHadronPhys.push_back( new G4NeutronTrackingCut("Neutron tracking cut"));
+  fHadronPhys.push_back( new G4EmExtraPhysics(verboseLevel));
+  if(flagHP) {
+    fHadronPhys.push_back( new G4HadronElasticPhysicsHP(verboseLevel));
+  } else {
+    fHadronPhys.push_back( new G4HadronElasticPhysics(verboseLevel));
+  }
+  fHadronPhys.push_back( new G4StoppingPhysics(verboseLevel));
+  fHadronPhys.push_back( new G4IonBinaryCascadePhysics(verboseLevel));
+  fHadronPhys.push_back( new G4NeutronTrackingCut(verboseLevel));
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -230,25 +246,25 @@ void PhysicsList::SetCutForPositron(G4double cut)
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-//void PhysicsList::SetTargetCut(G4double cut)
-//{
-//  if( !fTargetCuts ) fTargetCuts = new G4ProductionCuts();
+void PhysicsList::SetTargetCut(G4double cut)
+{
+  if( !fTargetCuts ) fTargetCuts = new G4ProductionCuts();
 
-//  fTargetCuts->SetProductionCut(cut, idxG4GammaCut);
-//  fTargetCuts->SetProductionCut(cut, idxG4ElectronCut);
-//  fTargetCuts->SetProductionCut(cut, idxG4PositronCut);
+  fTargetCuts->SetProductionCut(cut, idxG4GammaCut);
+  fTargetCuts->SetProductionCut(cut, idxG4ElectronCut);
+  fTargetCuts->SetProductionCut(cut, idxG4PositronCut);
 
-//}
+}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-//void PhysicsList::SetDetectorCut(G4double cut)
-//{
-//  if( !fDetectorCuts ) fDetectorCuts = new G4ProductionCuts();
+void PhysicsList::SetDetectorCut(G4double cut)
+{
+  if( !fDetectorCuts ) fDetectorCuts = new G4ProductionCuts();
 
-//  fDetectorCuts->SetProductionCut(cut, idxG4GammaCut);
-//  fDetectorCuts->SetProductionCut(cut, idxG4ElectronCut);
-//  fDetectorCuts->SetProductionCut(cut, idxG4PositronCut);
-//}
+  fDetectorCuts->SetProductionCut(cut, idxG4GammaCut);
+  fDetectorCuts->SetProductionCut(cut, idxG4ElectronCut);
+  fDetectorCuts->SetProductionCut(cut, idxG4PositronCut);
+}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

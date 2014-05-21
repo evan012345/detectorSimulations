@@ -20,6 +20,8 @@
 
 #include "DetectionSystemSodiumIodide.hh"
 
+#include "G4SystemOfUnits.hh" // new version geant4.10 requires units
+
 DetectionSystemSodiumIodide::DetectionSystemSodiumIodide() :
     // LogicalVolumes 
     detector_volume_log(0),    

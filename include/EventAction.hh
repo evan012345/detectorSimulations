@@ -23,24 +23,32 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
+/// \file analysis/shared/include/EventAction.hh
+/// \brief Definition of the EventAction class
+//
+//
+// $Id: EventAction.hh 68015 2013-03-13 13:27:27Z gcosmo $
+//
+// 
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 #ifndef EventAction_h
 #define EventAction_h 1
 
 #include "G4UserEventAction.hh"
 #include "globals.hh"
-
 #include "HistoManager.hh"
 
 class RunAction;
 class HistoManager;
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-using namespace std;
 static const int MAXSTEPS = 1000;
+static const int MAXHITS = 100;
 static const int NUMSTEPVARS = 14;
 
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 class EventAction : public G4UserEventAction
 {
@@ -48,46 +56,47 @@ public:
   EventAction(RunAction*, HistoManager*);
   virtual ~EventAction();
 
-  void  BeginOfEventAction(const G4Event*);
-  void  EndOfEventAction(const G4Event*);
+  virtual void  BeginOfEventAction(const G4Event*);
+  virtual void    EndOfEventAction(const G4Event*);
+    
+  void AddAbs(G4double de, G4double dl) {fEnergyAbs += de; fTrackLAbs += dl;};
+  void AddGap(G4double de, G4double dl) {fEnergyGap += de; fTrackLGap += dl;};
 
+  //
   G4int GetEventNumber(){return evtNb;};
 
-  void AddStepTracker(G4double eventNumber, G4double stepNumber, G4String volume, G4double cryNumber, G4double detNumber, 
-  						G4double depEnergy, G4double posx, G4double posy, G4double posz, G4double time, 
-  						G4double initialDirectionX, G4double initialDirectionY, G4double initialDirectionZ, 
-  						G4double initialEnergy, G4int trackID) {
-  						
-					  if(histoManager->GetStepTrackerBool())   {
-						  	stepTracker[0][stepIndex] = eventNumber; 
-						  	stepTracker[1][stepIndex] = stepNumber; 
-						  	stepTracker[2][stepIndex] = cryNumber; 
-						  	stepTracker[3][stepIndex] = detNumber; 
-						  	stepTracker[4][stepIndex] = depEnergy; 
-						  	stepTracker[5][stepIndex] = posx; 
-						  	stepTracker[6][stepIndex] = posy; 
-						  	stepTracker[7][stepIndex] = posz; 
-						  	stepTracker[8][stepIndex] = time; 
-						  	stepTracker[9][stepIndex] = initialDirectionX;
-							stepTracker[10][stepIndex] = initialDirectionY;
-							stepTracker[11][stepIndex] = initialDirectionZ;
-						  	stepTracker[12][stepIndex] = initialEnergy;
-						  	stepTracker[13][stepIndex] = trackID;
-						  	stepVolume[stepIndex] = volume ; 	
-						  	stepIndex++; 
-						  	if(stepIndex == MAXSTEPS) 	{
-						  		G4cout << "\n ----> error 13423549 \n" << G4endl; 
-						  		exit(1);
-						  		}
-						  }; 
- 	};
+//  void AddStepTracker(G4double eventNumber, G4double stepNumber, G4String volume, G4double cryNumber, G4double detNumber,
+//  						G4double depEnergy, G4double posx, G4double posy, G4double posz, G4double time,
+//  						G4double initialDirectionX, G4double initialDirectionY, G4double initialDirectionZ,
+//  						G4double initialEnergy, G4int trackID) {
+
+//					  if(histoManager->GetStepTrackerBool())   {
+//						  	stepTracker[0][stepIndex] = eventNumber;
+//						  	stepTracker[1][stepIndex] = stepNumber;
+//						  	stepTracker[2][stepIndex] = cryNumber;
+//						  	stepTracker[3][stepIndex] = detNumber;
+//						  	stepTracker[4][stepIndex] = depEnergy;
+//						  	stepTracker[5][stepIndex] = posx;
+//						  	stepTracker[6][stepIndex] = posy;
+//						  	stepTracker[7][stepIndex] = posz;
+//						  	stepTracker[8][stepIndex] = time;
+//						  	stepTracker[9][stepIndex] = initialDirectionX;
+//							stepTracker[10][stepIndex] = initialDirectionY;
+//							stepTracker[11][stepIndex] = initialDirectionZ;
+//						  	stepTracker[12][stepIndex] = initialEnergy;
+//						  	stepTracker[13][stepIndex] = trackID;
+//						  	stepVolume[stepIndex] = volume ;
+//						  	stepIndex++;
+//						  	if(stepIndex == MAXSTEPS) 	{
+//						  		G4cout << "\n ----> error 13423549 \n" << G4endl;
+//						  		exit(1);
+//						  		}
+//						  };
+// 	};
 
   // particle types
   void AddParticleType(G4int index) {particleTypes[index] += 1;};
 
-  // Grid kinetic energy of gammas and electrons
-  void SetGridEKinElectronDet(G4double de, G4double dl, G4int det) { if(gridEKinElectronDet[det] < de) gridEKinElectronDet[det] = de; gridTrackElectronDet[det] += dl;};
-  void SetGridEKinGammaDet(G4double de, G4double dl, G4int det) { if(gridEKinGammaDet[det] < de) gridEKinGammaDet[det] = de; gridTrackGammaDet[det] += dl;};
   // Energy deposit in detection systems
   void AddGriffinCrystDet(G4double de, G4double dl, G4int det, G4int cry) {GriffinCrystEnergyDet[det][cry] += de; GriffinCrystTrackDet[det][cry] += dl;};
   void AddGriffinSuppressorBackDet(G4double de, G4double dl, G4int det, G4int cry) {GriffinSuppressorBackEnergyDet[det][cry] += de; GriffinSuppressorBackTrackDet[det][cry] += dl;};
@@ -96,149 +105,91 @@ public:
   void AddGriffinSuppressorRightExtensionDet(G4double de, G4double dl, G4int det, G4int cry) {GriffinSuppressorRightExtensionEnergyDet[det][cry] += de; GriffinSuppressorRightExtensionTrackDet[det][cry] += dl;};
   void AddGriffinSuppressorRightSideDet(G4double de, G4double dl, G4int det, G4int cry) {GriffinSuppressorRightSideEnergyDet[det][cry] += de; GriffinSuppressorRightSideTrackDet[det][cry] += dl;};
 
-  void AddSodiumIodideCrystDet(G4double de, G4double dl, G4int det) {SodiumIodideCrystEnergyDet[det] += de; SodiumIodideCrystTrackDet[det] += dl;};
+  void Add8piCrystDet(G4double de, G4double dl, G4int det) {EightPiCrystEnergyDet[det] += de; EightPiCrystTrackDet[det] += dl;} ;
 
-  void AddLaBrCrystDet(G4double de, G4double dl, G4int det) {LaBrCrystEnergyDet[det] += de; LaBrCrystTrackDet[det] += dl;};
+  void AddLaBrCrystDet(G4double de, G4double dl, G4int det) {LaBrCrystEnergyDet[det] += de; LaBrCrystTrackDet[det] += dl;} ;
 
-  void AddSceptarSquareCrystDet(G4double de, G4double dl, G4int det) {SceptarSquareCrystEnergyDet[det] += de; SceptarSquareCrystTrackDet[det] += dl;} ;
-  void AddSceptarAngledCrystDet(G4double de, G4double dl, G4int det) {SceptarAngledCrystEnergyDet[det] += de; SceptarAngledCrystTrackDet[det] += dl;} ;
+  void AncillaryBgoDet(G4double de, G4double dl, G4int det) {AncillaryBgoEnergyDet[det] += de; AncillaryBgoTrackDet[det] += dl;} ;
 
-	// NOTE: I am initializing and strucuring these based on AddSodiumIodideCrystDet and AddLaBrCrystDet
-	// please correct them if they are wrong. 
-  void Add8piCrystDet(G4double de, G4double dl, G4int det) {EightPiCrystEnergyDet[det] += de; EightPiCrystTrackDet[det] += dl;} ;  
-  void AddSpiceCrystDet(G4double de, G4double dl, G4int det) {SpiceCrystEnergyDet[det] += de; SpiceCrystTrackDet[det] += dl;} ;
-  void AddS3CrystDet(G4double de, G4double dl, G4int det) {SpiceCrystEnergyDet[det] += de; SpiceCrystTrackDet[det] += dl;} ;
-  void AddPacesCrystDet(G4double de, G4double dl, G4int det) {PacesCrystEnergyDet[det] += de; PacesCrystTrackDet[det] += dl;} ;
+  void SceptarDet(G4double de, G4double dl, G4int det) {SceptarEnergyDet[det] += de; SceptarTrackDet[det] += dl;} ;
 
+
+  void AddHitTracker(G4String mnemonic, G4int eventNumber, G4int trackID, G4int parentID, G4int stepNumber, G4int particleType, G4int processType, G4int systemID, G4int cryNumber, G4int detNumber, G4double depEnergy, G4double posx, G4double posy, G4double posz, G4double time);
 
 
 private:
+   RunAction*    fRunAct;
+   HistoManager* fHistoManager;
 
-	void ClearVariables();
+      
+   G4double  fEnergyAbs, fEnergyGap;
+   G4double  fTrackLAbs, fTrackLGap;
+                     
+   G4int     fPrintModulo;
+   G4int     evtNb;
 
-	void FillParticleType();
-	void FillGridEkin();
-	void FillGriffinCryst();
-	void FillLaBrCryst();
-	void FillSodiumIodideCryst();
-	void FillSceptarCryst() ;
-	void FillSpiceCryst() ;
-	void FillS3Cryst();
-	void FillPacesCryst() ; 
-	void Fill8piCryst() ;
-
-	RunAction*    runAct;
-	HistoManager* histoManager;
-
-	G4int     printModulo;
-    G4int     evtNb;
-    G4bool    stepTrackerBool;
-
-    // tracking info
-    G4double stepTracker[NUMSTEPVARS][MAXSTEPS];
-    G4String stepVolume[MAXSTEPS]; // volume at each step 
-    G4int    stepIndex;
-
-	// Particle types in simulation
-	G4int particleTypes[NUMPARTICLETYPES];
+   void ClearVariables();
+   void FillParticleType();
+   void FillGriffinCryst();
+   void Fill8piCryst() ;
+   void FillLaBrCryst() ;
+   void FillAncillaryBgo() ;
+   void FillSceptar() ;
 
 
-	// Grid kinetic energy / track length of gamma and electon
-	G4double gridEKinElectronDet[MAXNUMDET];
-	G4double gridTrackElectronDet[MAXNUMDET];
-	G4double gridEKinGammaDet[MAXNUMDET];
-	G4double gridTrackGammaDet[MAXNUMDET];
+   // tracking info
+   G4double stepTracker[NUMSTEPVARS][MAXSTEPS];
 
-	// Energy deposit in detection systems
-	G4double GriffinCrystEnergyDet[MAXNUMDETGRIFFIN][MAXNUMCRYGRIFFIN];
-	G4double GriffinCrystTrackDet[MAXNUMDETGRIFFIN][MAXNUMCRYGRIFFIN];
-	G4double GriffinSuppressorBackEnergyDet[MAXNUMDETGRIFFIN][MAXNUMCRYGRIFFIN];
-	G4double GriffinSuppressorBackTrackDet[MAXNUMDETGRIFFIN][MAXNUMCRYGRIFFIN];
+   G4String stepVolume[MAXSTEPS]; // volume at each step
+   G4int    stepIndex;
 
-	G4double GriffinSuppressorLeftExtensionEnergyDet[MAXNUMDETGRIFFIN][MAXNUMCRYGRIFFIN];
-	G4double GriffinSuppressorLeftExtensionTrackDet[MAXNUMDETGRIFFIN][MAXNUMCRYGRIFFIN];
-	G4double GriffinSuppressorLeftSideEnergyDet[MAXNUMDETGRIFFIN][MAXNUMCRYGRIFFIN];
-	G4double GriffinSuppressorLeftSideTrackDet[MAXNUMDETGRIFFIN][MAXNUMCRYGRIFFIN];
+   G4int    hitTrackerI[NUMSTEPVARS][MAXHITS];
+   G4double hitTrackerD[NUMSTEPVARS][MAXHITS];
+   G4int    hitIndex;
+   G4int    pTrackID;
+   G4int    pParentID;
 
-	G4double GriffinSuppressorRightExtensionEnergyDet[MAXNUMDETGRIFFIN][MAXNUMCRYGRIFFIN];
-	G4double GriffinSuppressorRightExtensionTrackDet[MAXNUMDETGRIFFIN][MAXNUMCRYGRIFFIN];
-	G4double GriffinSuppressorRightSideEnergyDet[MAXNUMDETGRIFFIN][MAXNUMCRYGRIFFIN];
-	G4double GriffinSuppressorRightSideTrackDet[MAXNUMDETGRIFFIN][MAXNUMCRYGRIFFIN];
-
-	G4double LaBrCrystEnergyDet[MAXNUMDET];
-	G4double LaBrCrystTrackDet[MAXNUMDET];
-
-	G4double SodiumIodideCrystEnergyDet[MAXNUMDET];
-	G4double SodiumIodideCrystTrackDet[MAXNUMDET];
+   G4int    numberOfHits;
+   G4String pHitMnemonic[MAXHITS];
 
 
-	// NOTE: I am initializing these arrays based on the LaBr and SodiumIodide definitions. If
-	// they are not correct please correct them. 
-    G4double SceptarSquareCrystEnergyDet[MAXNUMDET] ;
-    G4double SceptarSquareCrystTrackDet[MAXNUMDET] ;
+   // Particle types in simulation
+   G4int particleTypes[NUMPARTICLETYPES];
 
-    G4double SceptarAngledCrystEnergyDet[MAXNUMDET] ;
-    G4double SceptarAngledCrystTrackDet[MAXNUMDET] ;
+   // Energy deposit in detection systems
+   G4double GriffinCrystEnergyDet[MAXNUMDETGRIFFIN][MAXNUMCRYGRIFFIN];
+   G4double GriffinCrystTrackDet[MAXNUMDETGRIFFIN][MAXNUMCRYGRIFFIN];
+   G4double GriffinSuppressorBackEnergyDet[MAXNUMDETGRIFFIN][MAXNUMCRYGRIFFIN];
+   G4double GriffinSuppressorBackTrackDet[MAXNUMDETGRIFFIN][MAXNUMCRYGRIFFIN];
 
-	G4double EightPiCrystEnergyDet[MAXNUMDET] ;
-	G4double EightPiCrystTrackDet[MAXNUMDET] ; 	
+   G4double GriffinSuppressorLeftExtensionEnergyDet[MAXNUMDETGRIFFIN][MAXNUMCRYGRIFFIN];
+   G4double GriffinSuppressorLeftExtensionTrackDet[MAXNUMDETGRIFFIN][MAXNUMCRYGRIFFIN];
+   G4double GriffinSuppressorLeftSideEnergyDet[MAXNUMDETGRIFFIN][MAXNUMCRYGRIFFIN];
+   G4double GriffinSuppressorLeftSideTrackDet[MAXNUMDETGRIFFIN][MAXNUMCRYGRIFFIN];
 
-	G4double SpiceCrystEnergyDet[MAXNUMDET] ;
-	G4double SpiceCrystTrackDet[MAXNUMDET] ;	
-	
-	G4double S3CrystEnergyDet[MAXNUMDET] ;
-	G4double S3CrystTrackDet[MAXNUMDET] ;	
-	
-	G4double PacesCrystEnergyDet[MAXNUMDET] ;
-	G4double PacesCrystTrackDet[MAXNUMDET] ;
-	
+   G4double GriffinSuppressorRightExtensionEnergyDet[MAXNUMDETGRIFFIN][MAXNUMCRYGRIFFIN];
+   G4double GriffinSuppressorRightExtensionTrackDet[MAXNUMDETGRIFFIN][MAXNUMCRYGRIFFIN];
+   G4double GriffinSuppressorRightSideEnergyDet[MAXNUMDETGRIFFIN][MAXNUMCRYGRIFFIN];
+   G4double GriffinSuppressorRightSideTrackDet[MAXNUMDETGRIFFIN][MAXNUMCRYGRIFFIN];
+
+   G4double EightPiCrystEnergyDet[MAXNUMDET] ;
+   G4double EightPiCrystTrackDet[MAXNUMDET] ;
+
+   G4double LaBrCrystEnergyDet[MAXNUMDET] ;
+   G4double LaBrCrystTrackDet[MAXNUMDET] ;
+
+   G4double AncillaryBgoEnergyDet[MAXNUMDET] ;
+   G4double AncillaryBgoTrackDet[MAXNUMDET] ;
+
+   G4double SceptarEnergyDet[MAXNUMDET] ;
+   G4double SceptarTrackDet[MAXNUMDET] ;
+
+
+
 };
 
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
 #endif
-
-
-
-
-// *****************************************************************************
-// *  Old code.
-// *	
-// *	This section was used in the original (ie. early September 2013) 
-// *  codebase but has since been replaced with a newer, more efficient version. 
-// *  I have left it here in case I screw anything up while trying to merge the 
-// *  two bases together. 
-// * 
-// *	If this section is to be used, everything above this comment must be removed. 
-// *	
-// *  Tyler Ballast
-// ***************************************************************************** 
-
-//#ifndef EventAction_h
-//#define EventAction_h 1
-
-//#include "G4UserEventAction.hh"
-
-//using namespace std;
-
-//class G4Event;
-
-//class EventAction : public G4UserEventAction
-//{
-//  public:
-//    EventAction();
-//   ~EventAction();
-
-//  public:
-//    void BeginOfEventAction(const G4Event*);
-//    void EndOfEventAction(const G4Event*);
-
-//  private:
-//    G4String PrepareLine( G4int, G4double, G4double, G4ThreeVector, G4int, G4String, G4String);
-
-//  private:
-//    G4int  eventID;
-
-//};
-//#endif
-
 
     

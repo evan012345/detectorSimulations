@@ -23,6 +23,8 @@
 
 #include "DetectionSystemSpice.hh"
 
+#include "G4SystemOfUnits.hh" // new version geant4.10 requires units
+
 double DetectionSystemSpice::SpiceResolution[2];
 
 DetectionSystemSpice::DetectionSystemSpice() :

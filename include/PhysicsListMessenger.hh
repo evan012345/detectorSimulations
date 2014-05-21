@@ -23,6 +23,8 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
+// $Id: PhysicsListMessenger.hh 68007 2013-03-13 11:28:03Z gcosmo $
+//
 /// \file radioactivedecay/rdecay02/include/PhysicsListMessenger.hh
 /// \brief Definition of the PhysicsListMessenger class
 //
@@ -60,8 +62,8 @@ private:
   G4UIcmdWithADoubleAndUnit* fElectCutCmd;
   G4UIcmdWithADoubleAndUnit* fProtoCutCmd;    
   G4UIcmdWithADoubleAndUnit* fAllCutCmd;    
-//  G4UIcmdWithADoubleAndUnit* fMCutCmd;
-//  G4UIcmdWithADoubleAndUnit* fECutCmd;
+  G4UIcmdWithADoubleAndUnit* fMCutCmd;
+  G4UIcmdWithADoubleAndUnit* fECutCmd;
   G4UIcmdWithAString*        fPListCmd;
     
 };

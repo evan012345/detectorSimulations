@@ -35,6 +35,8 @@
 #ifndef DetectionSystemLanthanumBromide_h
 #define DetectionSystemLanthanumBromide_h 1
 
+#include "G4SystemOfUnits.hh" // new version geant4.10 requires units
+
 #include "G4VUserDetectorConstruction.hh"
 #include "globals.hh"
 
@@ -49,13 +51,18 @@ class DetectionSystemLanthanumBromide
     ~DetectionSystemLanthanumBromide();
     
     G4int Build() ; //G4SDManager* mySDman);
-    G4int PlaceDetector(G4LogicalVolume* exp_hall_log, G4int detector_number);
+    G4int PlaceDetector(G4LogicalVolume* exp_hall_log, G4int detector_number, G4double radialpos);
     G4double const GetDetectorLengthOfUnitsCM() {return this->detector_length_z;};
     G4double GetCrystalRadius() {return this->crystal_outer_radius;};
     G4double GetCrystalLength() {return this->crystal_length_z;};
     G4double GetR();
     G4double GetTheta(G4int i);
     G4double GetPhi(G4int i);
+    G4double GetYaw(G4int i);
+    G4double GetPitch(G4int i);
+    G4double GetRoll(G4int i);
+    G4double GetCrystalRadialPosition() {return this->packing_front_lid_thickness+this->disc_front_lid_thickness+this->seal_front_lid_thickness+this->can_front_lid_thickness+12.5*cm ;};
+
 
   private:
     // Logical volumes        
@@ -113,6 +120,8 @@ class DetectionSystemLanthanumBromide
 
     G4double detector_length_z;
     G4double detectorAngles[8][5];
+
+    G4double set_radial_pos;
 
     G4Tubs* BuildCrystal();
     G4Tubs* BuildAluminumCan();

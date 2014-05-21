@@ -27,7 +27,7 @@
 // $Id: DetectorMessenger.hh,v 1.1 2010-10-18 15:56:17 maire Exp $
 // GEANT4 tag $Name: geant4-09-04-patch-02 $
 //
-// 
+//
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -55,21 +55,20 @@ class DetectorMessenger: public G4UImessenger
   public:
     DetectorMessenger( DetectorConstruction* ) ;
    ~DetectorMessenger();
-    
+
     void SetNewValue(G4UIcommand*, G4String);
-    
+
   private:
     DetectorConstruction* Detector;
-    
+
     G4UIdirectory*             detDir;
     G4UIdirectory*             appDir;
     G4UIdirectory*             worldDir;
     G4UIdirectory*             DetSysDir;
-    G4UIcmdWithAString*        WorldMaterialCmd; 
-    G4UIcmdWith3VectorAndUnit* WorldDimensionsCmd; 
+    G4UIcmdWithAString*        WorldMaterialCmd;
+    G4UIcmdWith3VectorAndUnit* WorldDimensionsCmd;
     G4UIcmdWithABool*          WorldVisCmd;
     G4UIcmdWith3VectorAndUnit* WorldMagneticFieldCmd;
-    G4UIcmdWithAString*        WorldTabMagneticFieldCmd;
     G4UIcmdWithoutParameter*   UpdateCmd;
 
     // Generic Target Apparatus
@@ -102,7 +101,9 @@ class DetectorMessenger: public G4UImessenger
     // Detection Systems
     G4UIcmdWithAnInteger*   AddDetectionSystemGammaTrackingCmd;
     G4UIcmdWithAnInteger*   AddDetectionSystemSodiumIodideCmd;
-    G4UIcmdWithAnInteger*   AddDetectionSystemLanthanumBromideCmd;
+    G4UIcmdWith3Vector*   AddDetectionSystemLanthanumBromideCmd;
+    G4UIcmdWith3Vector*   AddDetectionSystemAncillaryBGOCmd;
+
     G4UIcmdWithAnInteger*   AddDetectionSystem8piCmd;
     G4UIcmdWithAnInteger*   AddDetectionSystem8piDetectorCmd;
     G4UIcmdWithAnInteger*   AddDetectionSystemSceptarCmd;
@@ -111,16 +112,15 @@ class DetectorMessenger: public G4UImessenger
     G4UIcmdWithAnInteger*   AddDetectionSystemGriffinBackCmd;
     G4UIcmdWithAnInteger*   AddDetectionSystemGriffinBackDetectorCmd;
     //G4UIcmdWith3Vector*     AddDetectionSystemGriffinPositionConfigCmd;
-    G4UIcommand*						SetSpiceResolutionVariablesCmd;
     G4UIcmdWithAnInteger*   AddDetectionSystemSpiceCmd;
-    G4UIcmdWithAnInteger*   AddDetectionSystemS3Cmd;
+    G4UIcmdWithAnInteger*   AddDetectionSystemSpiceV02Cmd;
     G4UIcmdWithAnInteger*   AddDetectionSystemPacesCmd;
-    G4UIcmdWithAnInteger*   AddDetectionSystemGriffinHevimetCmd ; 
+    G4UIcmdWithAnInteger*   AddDetectionSystemGriffinHevimetCmd ;
 
     G4UIcmdWithAnInteger*       AddDetectionSystemGriffinCustomDetectorCmd ;
     G4UIcmdWithAnInteger*	    AddDetectionSystemGriffinCustomCmd ;
     G4UIcmdWithAnInteger*       AddDetectionSystemGriffinShieldSelectCmd ;
-    G4UIcmdWithADoubleAndUnit*  AddDetectionSystemGriffinSetRadialDistanceCmd ; 
+    G4UIcmdWithADoubleAndUnit*  AddDetectionSystemGriffinSetRadialDistanceCmd ;
     G4UIcmdWithAnInteger*       AddDetectionSystemGriffinSetExtensionSuppLocationCmd ;
     G4UIcmdWith3Vector*         AddDetectionSystemGriffinSetDeadLayerCmd ;
     G4UIcmdWithABool*           UseTIGRESSPositionsCmd;

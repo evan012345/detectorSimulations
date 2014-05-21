@@ -23,11 +23,13 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
+/// \file analysis/shared/include/RunAction.hh
+/// \brief Definition of the RunAction class
 //
-// $Id: DetectorConstruction.hh,v 1.1 2010-10-18 15:56:17 maire Exp $
-// GEANT4 tag $Name: geant4-09-04-patch-02 $
 //
+// $Id: RunAction.hh 68015 2013-03-13 13:27:27Z gcosmo $
 //
+// 
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -35,72 +37,36 @@
 #ifndef RunAction_h
 #define RunAction_h 1
 
-//#include <fstream>
-//#include "G4ThreeVector.hh"
-#include "globals.hh"
 #include "G4UserRunAction.hh"
+#include "globals.hh"
 
-//using namespace std;
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 class G4Run;
-class HistoManager ;
-//class RunActionMessenger;
+class HistoManager;
 
 class RunAction : public G4UserRunAction
 {
-  public:
-    RunAction( HistoManager* );
-    virtual ~RunAction();
+public:
+  RunAction(HistoManager*);
+  virtual ~RunAction();
 
-    void BeginOfRunAction (const G4Run*);
-    void EndOfRunAction   (const G4Run*);
-
-//    void EnableWrite      ( G4bool );
-//    void EnableWriteHex   ( G4bool );
-
-//    void SetRunNumber     ( G4int );
-
-//    inline void  LMwrite(const G4String &theString) { outFileLMD << theString;   };
-//    inline void  LMwrite(const char     *theChars)  { outFileLMD << theChars;    };
-//    void  HEXwrite(G4int ndet, G4double ener, G4double time, G4ThreeVector pos1, G4int nseg, G4String process, G4String collection);
-
-//    void  HEXwriteStartFlag();
-//    void  HEXwriteEndFlag();
-
-//    void  TimeFlagStart();
-//    void  TimeFlagEnd();
-//    void  TimeEntry(G4double time_value);
-
-//    void  ParticleInfoFlagStart();
-//    void  ParticleInfoFlagEnd();
-//    void  ParticleInfoEntry(G4double time_value);
-
-//    void  SetTimeUnit(G4String newTimeUnit);
-
-//    inline G4bool DoWriteLMD()                         { return writeLMD;           };
-//    inline G4bool DoWriteHEX()                         { return writeHEX;           };
-//    inline G4int  GetRunNumber()                       { return runNumber;          };
+  virtual void BeginOfRunAction(const G4Run*);
+  virtual void   EndOfRunAction(const G4Run*);
     
-  private:
-  
-  	HistoManager* histoManager ;
-//    void  WriteHeader ();
-//    G4int OpenLMFile  ();  
-    
-//    std::ofstream outFileLMD;
-    
-//    G4int    runNumber;
-//    G4bool   writeLMD;
-//    G4bool   writeHEX;
-//    G4String outFileName;
-//    G4String timeUnit;
+  void fillPerEvent(G4double, G4double, G4double, G4double); 
 
-//    RunActionMessenger* myMessenger;
+private:
+  HistoManager* fHistoManager;
+
+  G4double fSumEAbs, fSum2EAbs;
+  G4double fSumEGap, fSum2EGap;
+    
+  G4double fSumLAbs, fSum2LAbs;
+  G4double fSumLGap, fSum2LGap;    
 };
 
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
 #endif
-
-
-
-
 

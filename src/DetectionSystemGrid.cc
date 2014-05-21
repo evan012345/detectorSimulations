@@ -22,6 +22,9 @@
 
 #include "DetectionSystemGrid.hh"
 
+#include "G4SystemOfUnits.hh" // new version geant4.10 requires units
+
+
 DetectionSystemGrid::DetectionSystemGrid(G4double x_length_in, G4double y_length_in, G4double z_length_in, G4double cube_size_in, G4String grid_mat, G4ThreeVector grid_colour) :
     // LogicalVolumes 
     gridcell_log(0)

@@ -33,6 +33,9 @@
 
 #include "DetectionSystemGriffin.hh"
 
+#include "G4SystemOfUnits.hh" // new version geant4.10 requires units
+
+
 ///////////////////////////////////////////////////////////////////////
 // The ::DetectionSystemGriffin constructor instatiates all the 
 // Logical and Physical Volumes used in the detector geometery (found
@@ -2168,7 +2171,7 @@ void DetectionSystemGriffin::ConstructNewSuppressorCasingWithShells()
         + this->suppressor_shell_thickness*2.0)
         * sin(this->bent_end_angle)) * tan(this->bent_end_angle)) ;
 
-  if( this->suppressor_position_selector == 0 )
+  if( this->suppressor_position_selector == 0 && this->include_extension_suppressors)
   {
 
     // these two parameters are for shifting the extensions back and out when in their BACK position
@@ -2218,7 +2221,7 @@ void DetectionSystemGriffin::ConstructNewSuppressorCasingWithShells()
   }//end if(detectors forward) statement
 
   // Otherwise, put them forward
-  else if( this->suppressor_position_selector == 1 )
+  else if( this->suppressor_position_selector == 1 && this->include_extension_suppressors)
   {
 
     for( i = 0 ; i < 4 ; i++){
@@ -2237,7 +2240,7 @@ void DetectionSystemGriffin::ConstructNewSuppressorCasingWithShells()
     
       rotateExtension[2*i+1] = new G4RotationMatrix;
       rotateExtension[2*i+1]->rotateY(M_PI/2.0);
-      rotateExtension[2*i+1]->rotateZ(M_PI/2.0 + this->bent_end_angle);  
+      rotateExtension[2*i+1]->rotateZ(M_PI/2.0 + this->bent_end_angle);
       rotateExtension[2*i+1]->rotateX(M_PI - i*M_PI/2);
 
       x =  x0;

@@ -72,6 +72,7 @@ class DetectionSystemSceptar
     G4double scint_angle2;
     G4double scint_angle3;
     G4double scint_angle4;
+    G4double scint_angle_move;
     G4double square_scint_radial_distance;
     G4double angled_scint_radial_distance;
     G4double angled_scint_move_back;

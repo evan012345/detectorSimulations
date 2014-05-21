@@ -23,9 +23,11 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
+/// \file analysis/shared/src/DetectorConstruction.cc
+/// \brief Implementation of the DetectorConstruction class
 //
-// $Id: DetectorConstruction.cc,v 1.1 2010-10-18 15:56:17 maire Exp $
-// GEANT4 tag $Name: geant4-09-04-patch-02 $
+//
+// $Id: DetectorConstruction.cc 77256 2013-11-22 10:10:23Z gcosmo $
 //
 // 
 
@@ -34,14 +36,11 @@
 
 #include "DetectorConstruction.hh"
 #include "DetectorMessenger.hh"
-#include "G4RunManager.hh"
 
 #include "G4Material.hh"
 #include "G4NistManager.hh"
 
-#include "G4Tubs.hh"
 #include "G4Box.hh"
-#include "G4Sphere.hh"
 #include "G4LogicalVolume.hh"
 #include "G4PVPlacement.hh"
 #include "G4PVReplica.hh"
@@ -50,48 +49,45 @@
 #include "G4PhysicalVolumeStore.hh"
 #include "G4LogicalVolumeStore.hh"
 #include "G4SolidStore.hh"
-#include "G4AssemblyVolume.hh"
 
 #include "G4VisAttributes.hh"
 #include "G4Colour.hh"
+#include "G4SystemOfUnits.hh"
+#include "G4RunManager.hh"
 
-#include "G4FieldManager.hh"
-#include "G4UniformMagField.hh"
-//#include "MagneticField.hh"
-//#include "Field.hh"
-#include "GlobalField.hh"
-#include "G4TransportationManager.hh"
-#include "nonUniformMagneticField.hh"
 
-#include "DetectionSystemGammaTracking.hh"
+//#include "DetectionSystemGammaTracking.hh"
 #include "DetectionSystem8pi.hh"
 #include "DetectionSystemGriffin.hh"
 #include "DetectionSystemSceptar.hh"
 #include "DetectionSystemSpice.hh"
-#include "DetectionSystemS3.hh"
+#include "DetectionSystemSpiceV02.hh"
 #include "DetectionSystemPaces.hh"
 #include "DetectionSystemSodiumIodide.hh"
 #include "DetectionSystemLanthanumBromide.hh"
-#include "ApparatusGenericTarget.hh"
-#include "ApparatusSpiceTargetChamber.hh"
+//#include "ApparatusGenericTarget.hh"
+//#include "ApparatusSpiceTargetChamber.hh"
 #include "Apparatus8piVacuumChamber.hh"
 #include "Apparatus8piVacuumChamberAuxMatShell.hh"
-#include "ApparatusFieldBox.hh"
+//#include "ApparatusFieldBox.hh"
 
 #include "DetectionSystemBox.hh" // New file
 #include "DetectionSystemGrid.hh"
+
+#include "DetectionSystemAncillaryBGO.hh"
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 DetectorConstruction::DetectorConstruction() :
     // Fields
-//    expHallMagField( 0 ), 
+//    expHallMagField( 0 ),
 //    defaultMaterial( 0 ),
-    solidWorld( 0 ), 
-    logicWorld( 0 ), 
+    solidWorld( 0 ),
+    logicWorld( 0 ),
     physiWorld( 0 )
 {
 
-	WorldSizeX  = WorldSizeY = WorldSizeZ = 10.0*m;
+    WorldSizeX  = WorldSizeY = WorldSizeZ = 10.0*m;
 
   box_mat = "G4_WATER";
   box_thickness = 0.0*mm;
@@ -109,8 +105,8 @@ DetectorConstruction::DetectorConstruction() :
 //  this->builtDetectors = false;
 
   // ensure the global field is initialized
-  (void)GlobalField::getObject();
-  
+//  (void)GlobalField::getObject();
+
   this->matWorldName = "G4_AIR";
 
   // Generic Target Apparatus
@@ -127,12 +123,12 @@ DetectorConstruction::DetectorConstruction() :
   // parameters to suppress:
 
   DefineSuppressedParameters();
-  
+
   // Shield Selection Default
 
   this->useTigressPositions = false;
 
-  this->detectorShieldSelect = 1 ; // Include suppressors by default. 
+  this->detectorShieldSelect = 1 ; // Include suppressors by default.
   this->extensionSuppressorLocation = 0 ; // Back by default (Detector Forward)
   this->hevimetSelector = 0 ; // Chooses whether or not to include a hevimet
 
@@ -162,7 +158,7 @@ DetectorConstruction::DetectorConstruction() :
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 DetectorConstruction::~DetectorConstruction()
-{ 
+{
   delete detectorMessenger;
 }
 
@@ -171,49 +167,49 @@ DetectorConstruction::~DetectorConstruction()
 G4VPhysicalVolume* DetectorConstruction::Construct()
 {
 
-	// Replaced by ConstructDetectionSystems
-	
+    // Replaced by ConstructDetectionSystems
+
   // Experimental hall (world volume)
   // search the world material by its name
-  
+
   G4GeometryManager::GetInstance()->OpenGeometry();
   G4PhysicalVolumeStore::GetInstance()->Clean();
   G4LogicalVolumeStore::GetInstance()->Clean();
   G4SolidStore::GetInstance()->Clean();
-  
+
   G4Material* matWorld = G4Material::GetMaterial(matWorldName);
-  
-	if( !matWorld ) {
+
+    if( !matWorld ) {
     G4cout << " ----> Material " << matWorldName << " not found, cannot build world! " << G4endl;
     return 0;
   }
-  
+
   solidWorld = new G4Box("World", WorldSizeX/2,WorldSizeY/2,WorldSizeZ/2);
-  
+
   logicWorld = new G4LogicalVolume(solidWorld,		//its solid
                                    matWorld,	//its material
                                    "World");		//its name
-  
+
   physiWorld = new G4PVPlacement(   0,                  //no rotation
                                     G4ThreeVector(),	//at (0,0,0)
                                     logicWorld,         //its logical volume
                                     "World",            //its name
                                     0,                  //its mother  volume
                                     false,              //no boolean operation
-                                    0);                 //copy number  
-  
+                                    0);                 //copy number
+
   // Visualization Attributes
 
-  logicWorld->SetVisAttributes (G4VisAttributes::Invisible); // The following block of code works too. 
-  
+  logicWorld->SetVisAttributes (G4VisAttributes::Invisible); // The following block of code works too.
+
 //  G4VisAttributes* worldVisAtt = new G4VisAttributes(G4Colour(0.0,1.0,1.0));
 //  worldVisAtt->SetForceWireframe(true);
 //  worldVisAtt->SetVisibility(this->world_vis);
 //  logicWorld->SetVisAttributes(worldVisAtt);
-//  this->logicWorld = logicWorld; 
-  
-  return physiWorld ; 
-  
+//  this->logicWorld = logicWorld;
+
+  return physiWorld ;
+
 
 }
 
@@ -225,9 +221,9 @@ void DetectorConstruction::SetWorldMaterial( G4String name )
 
 void DetectorConstruction::SetWorldDimensions( G4ThreeVector vec )
 {
-	WorldSizeX = vec.x() ;
-	WorldSizeY = vec.y() ; 
-	WorldSizeZ = vec.z() ;
+    WorldSizeX = vec.x() ;
+    WorldSizeY = vec.y() ;
+    WorldSizeZ = vec.z() ;
   UpdateGeometry(); // auto update
 }
 
@@ -237,143 +233,138 @@ void DetectorConstruction::SetWorldVis( G4bool vis )
   UpdateGeometry(); // auto update
 }
 
-void DetectorConstruction::SetWorldMagneticField( G4ThreeVector vec )
-{
-    //expHallMagField->SetFieldValue(G4ThreeVector(vec.x(),vec.y(),vec.z()));
-}
-
-void DetectorConstruction::SetTabMagneticField(G4String PathAndTableName)
-{
-  nonUniformMagneticField* tabulatedField = new nonUniformMagneticField(PathAndTableName,0);
-}
+//void DetectorConstruction::SetWorldMagneticField( G4ThreeVector vec )
+//{
+//    //expHallMagField->SetFieldValue(G4ThreeVector(vec.x(),vec.y(),vec.z()));
+//}
 
 void DetectorConstruction::UpdateGeometry()
 {
   G4RunManager::GetRunManager()->DefineWorldVolume(Construct());
 }
 
-void DetectorConstruction::SetGenericTargetMaterial( G4String name )
-{
-  this->setGenericTargetMaterial = true;
-  this->genericTargetMaterial = name;
-  SetGenericTarget();
-}
+//void DetectorConstruction::SetGenericTargetMaterial( G4String name )
+//{
+//  this->setGenericTargetMaterial = true;
+//  this->genericTargetMaterial = name;
+//  SetGenericTarget();
+//}
 
-void DetectorConstruction::SetGenericTargetDimensions( G4ThreeVector vec )
-{
-  this->setGenericTargetDimensions = true;
-  this->genericTargetDimensions = vec;
-  SetGenericTarget();
-}
+//void DetectorConstruction::SetGenericTargetDimensions( G4ThreeVector vec )
+//{
+//  this->setGenericTargetDimensions = true;
+//  this->genericTargetDimensions = vec;
+//  SetGenericTarget();
+//}
 
-void DetectorConstruction::SetGenericTargetPosition( G4ThreeVector vec )
-{
-  this->setGenericTargetPosition = true;
-  this->genericTargetPosition = vec;
-  SetGenericTarget();
-}
+//void DetectorConstruction::SetGenericTargetPosition( G4ThreeVector vec )
+//{
+//  this->setGenericTargetPosition = true;
+//  this->genericTargetPosition = vec;
+//  SetGenericTarget();
+//}
 
-void DetectorConstruction::SetGenericTarget()
-{
-  if( this->setGenericTargetMaterial ) 
-  {
-    if( this->setGenericTargetDimensions ) 
-    {
-      if( this->setGenericTargetPosition ) 
-      {
-        G4String name = this->genericTargetMaterial;
-        G4double vec_x = this->genericTargetDimensions.x()/mm;
-        G4double vec_y = this->genericTargetDimensions.y()/mm;
-        G4double vec_z = this->genericTargetDimensions.z()/mm;
-        ApparatusGenericTarget* pApparatusGenericTarget = new ApparatusGenericTarget();
-        pApparatusGenericTarget->Build(name, vec_x, vec_y, vec_z);
-        G4RotationMatrix* rotate = new G4RotationMatrix;
-        pApparatusGenericTarget->PlaceApparatus(logicWorld, this->genericTargetPosition, rotate);
-      }
- 		}
-	}
-}
-void DetectorConstruction::SetFieldBoxMaterial( G4String name )
-{
-  this->setFieldBoxMaterial = true;
-  this->fieldBoxMaterial = name;
-  SetFieldBox();
-}
+//void DetectorConstruction::SetGenericTarget()
+//{
+//  if( this->setGenericTargetMaterial )
+//  {
+//    if( this->setGenericTargetDimensions )
+//    {
+//      if( this->setGenericTargetPosition )
+//      {
+//        G4String name = this->genericTargetMaterial;
+//        G4double vec_x = this->genericTargetDimensions.x()/mm;
+//        G4double vec_y = this->genericTargetDimensions.y()/mm;
+//        G4double vec_z = this->genericTargetDimensions.z()/mm;
+//        ApparatusGenericTarget* pApparatusGenericTarget = new ApparatusGenericTarget();
+//        pApparatusGenericTarget->Build(name, vec_x, vec_y, vec_z);
+//        G4RotationMatrix* rotate = new G4RotationMatrix;
+//        pApparatusGenericTarget->PlaceApparatus(logicWorld, this->genericTargetPosition, rotate);
+//      }
+//        }
+//    }
+//}
+//void DetectorConstruction::SetFieldBoxMaterial( G4String name )
+//{
+//  this->setFieldBoxMaterial = true;
+//  this->fieldBoxMaterial = name;
+//  SetFieldBox();
+//}
 
-void DetectorConstruction::SetFieldBoxDimensions( G4ThreeVector vec )
-{
-  this->setFieldBoxDimensions = true;
-  this->fieldBoxDimensions = vec;
-  SetFieldBox();
-}
+//void DetectorConstruction::SetFieldBoxDimensions( G4ThreeVector vec )
+//{
+//  this->setFieldBoxDimensions = true;
+//  this->fieldBoxDimensions = vec;
+//  SetFieldBox();
+//}
 
-void DetectorConstruction::SetFieldBoxPosition( G4ThreeVector vec )
-{
-  this->setFieldBoxPosition = true;
-  this->fieldBoxPosition = vec;
-  SetFieldBox();
-}
+//void DetectorConstruction::SetFieldBoxPosition( G4ThreeVector vec )
+//{
+//  this->setFieldBoxPosition = true;
+//  this->fieldBoxPosition = vec;
+//  SetFieldBox();
+//}
 
-void DetectorConstruction::SetFieldBoxMagneticField( G4ThreeVector vec )
-{
-  this->setFieldBoxMagneticField = true;
-  this->fieldBoxMagneticField = vec;
-  SetFieldBox();
-}
+//void DetectorConstruction::SetFieldBoxMagneticField( G4ThreeVector vec )
+//{
+//  this->setFieldBoxMagneticField = true;
+//  this->fieldBoxMagneticField = vec;
+//  SetFieldBox();
+//}
 
-void DetectorConstruction::SetFieldBox( )
-{
-  if( this->setFieldBoxMagneticField && this->setFieldBoxMaterial && 
-  		this->setFieldBoxDimensions 	 && this->setFieldBoxPosition   ) 
-		{
-			G4String name = this->fieldBoxMaterial;
-			G4double vec_x = this->fieldBoxDimensions.x()/mm;
-			G4double vec_y = this->fieldBoxDimensions.y()/mm;
-			G4double vec_z = this->fieldBoxDimensions.z()/mm;
-			ApparatusFieldBox* pApparatusFieldBox = new ApparatusFieldBox();
-			pApparatusFieldBox->Build(name, vec_x, vec_y, vec_z, this->fieldBoxMagneticField);
-			G4RotationMatrix* rotate = new G4RotationMatrix;
-			pApparatusFieldBox->PlaceApparatus(logicWorld, this->fieldBoxPosition, rotate);
-		}
-}
+//void DetectorConstruction::SetFieldBox( )
+//{
+//  if( this->setFieldBoxMagneticField && this->setFieldBoxMaterial &&
+//        this->setFieldBoxDimensions 	 && this->setFieldBoxPosition   )
+//        {
+//            G4String name = this->fieldBoxMaterial;
+//            G4double vec_x = this->fieldBoxDimensions.x()/mm;
+//            G4double vec_y = this->fieldBoxDimensions.y()/mm;
+//            G4double vec_z = this->fieldBoxDimensions.z()/mm;
+//            ApparatusFieldBox* pApparatusFieldBox = new ApparatusFieldBox();
+//            pApparatusFieldBox->Build(name, vec_x, vec_y, vec_z, this->fieldBoxMagneticField);
+//            G4RotationMatrix* rotate = new G4RotationMatrix;
+//            pApparatusFieldBox->PlaceApparatus(logicWorld, this->fieldBoxPosition, rotate);
+//        }
+//}
 
-void DetectorConstruction::AddBox()
-{
-    if(box_thickness != 0.0*mm) 
-    {
-    	DetectionSystemBox* pBox = new DetectionSystemBox(	box_inner_dimensions.x(),
-        																									box_inner_dimensions.y(), 
-        																									box_inner_dimensions.z(), 
-        																									box_thickness, 
-        																									box_mat, 
-        																									box_colour ) ;
-        pBox->Build() ;
-        pBox->PlaceDetector( logicWorld ) ;
-    }
-}
+//void DetectorConstruction::AddBox()
+//{
+//    if(box_thickness != 0.0*mm)
+//    {
+//        DetectionSystemBox* pBox = new DetectionSystemBox(	box_inner_dimensions.x(),
+//                                                                                                            box_inner_dimensions.y(),
+//                                                                                                            box_inner_dimensions.z(),
+//                                                                                                            box_thickness,
+//                                                                                                            box_mat,
+//                                                                                                            box_colour ) ;
+//        pBox->Build() ;
+//        pBox->PlaceDetector( logicWorld ) ;
+//    }
+//}
 
 void DetectorConstruction::AddGrid()
 {
-    if(grid_size != 0.0*mm) 
+    if(grid_size != 0.0*mm)
     {
-    	DetectionSystemGrid* pGrid = new DetectionSystemGrid(	grid_dimensions.x(),
-        																										grid_dimensions.y(), 
-        																										grid_dimensions.z(), 
-        																										grid_size, 
-        																										grid_mat, 
-        																										grid_colour ) ;
+        DetectionSystemGrid* pGrid = new DetectionSystemGrid(	grid_dimensions.x(),
+                                                                                                                grid_dimensions.y(),
+                                                                                                                grid_dimensions.z(),
+                                                                                                                grid_size,
+                                                                                                                grid_mat,
+                                                                                                                grid_colour ) ;
         pGrid->Build();
         pGrid->PlaceDetector( logicWorld );
     }
 }
 
-void DetectorConstruction::AddApparatusSpiceTargetChamber()
-{
-   //Create Target Chamber
-   ApparatusSpiceTargetChamber* pApparatusSpiceTargetChamber = new ApparatusSpiceTargetChamber();
-   pApparatusSpiceTargetChamber->Build( logicWorld );
-    
-}
+//void DetectorConstruction::AddApparatusSpiceTargetChamber()
+//{
+//   //Create Target Chamber
+//   ApparatusSpiceTargetChamber* pApparatusSpiceTargetChamber = new ApparatusSpiceTargetChamber();
+//   pApparatusSpiceTargetChamber->Build( logicWorld );
+
+//}
 
 void DetectorConstruction::AddApparatus8piVacuumChamber()
 {
@@ -389,23 +380,23 @@ void DetectorConstruction::AddApparatus8piVacuumChamberAuxMatShell(G4double thic
    pApparatus8piVacuumChamberAuxMatShell->Build( logicWorld, thickness );
 }
 
-void DetectorConstruction::AddDetectionSystemGammaTracking(G4int ndet)
-{
-  // Describe Placement
-  G4ThreeVector direction = G4ThreeVector(0,0,1);
-  G4ThreeVector move = 0.0 * direction;
-  G4RotationMatrix* rotate = new G4RotationMatrix;
-  rotate->rotateX(0.0);
-  rotate->rotateY(0.0);
-  rotate->rotateZ(0.0);
+//void DetectorConstruction::AddDetectionSystemGammaTracking(G4int ndet)
+//{
+//  // Describe Placement
+//  G4ThreeVector direction = G4ThreeVector(0,0,1);
+//  G4ThreeVector move = 0.0 * direction;
+//  G4RotationMatrix* rotate = new G4RotationMatrix;
+//  rotate->rotateX(0.0);
+//  rotate->rotateY(0.0);
+//  rotate->rotateZ(0.0);
 
-  G4int detector_number = 0;
-	
-	DetectionSystemGammaTracking* pGammaTracking = new DetectionSystemGammaTracking() ;
-	pGammaTracking->Build() ;	
-	
-  pGammaTracking->PlaceDetector( logicWorld, move, rotate, detector_number );
-}
+//  G4int detector_number = 0;
+
+//    DetectionSystemGammaTracking* pGammaTracking = new DetectionSystemGammaTracking() ;
+//    pGammaTracking->Build() ;
+
+//  pGammaTracking->PlaceDetector( logicWorld, move, rotate, detector_number );
+//}
 
 void DetectorConstruction::AddDetectionSystemSodiumIodide(G4int ndet)
 {
@@ -452,26 +443,106 @@ void DetectorConstruction::AddDetectionSystemSodiumIodide(G4int ndet)
   }
 }
 
-void DetectorConstruction::AddDetectionSystemLanthanumBromide(G4int ndet)
+void DetectorConstruction::AddDetectionSystemLanthanumBromide(G4ThreeVector input)
 {
+    G4int ndet = G4int(input.x());
+    G4double radialpos = input.y()*cm;
+
     DetectionSystemLanthanumBromide* pDetectionSystemLanthanumBromide = new DetectionSystemLanthanumBromide();
     pDetectionSystemLanthanumBromide->Build();
 
   for(G4int detector_number = 0; detector_number < ndet; detector_number++)
   {
-    pDetectionSystemLanthanumBromide->PlaceDetector(logicWorld, detector_number);
+    pDetectionSystemLanthanumBromide->PlaceDetector(logicWorld, detector_number, radialpos);
   }
 }
+
+void DetectorConstruction::AddDetectionSystemAncillaryBGO(G4ThreeVector input)
+{
+
+    G4int ndet = G4int(input.x());
+    G4double radialpos = input.y()*cm;
+    G4int hevimetopt = G4int(input.z());
+
+    DetectionSystemAncillaryBGO* pDetectionSystemAncillaryBGO = new DetectionSystemAncillaryBGO();
+    pDetectionSystemAncillaryBGO->Build();
+
+  for(G4int detector_number = 0; detector_number < ndet; detector_number++)
+  {
+    pDetectionSystemAncillaryBGO->PlaceDetector(logicWorld, detector_number, radialpos, hevimetopt);
+  }
+}
+
+G4double DetectorConstruction::GetLanthanumBromideCrystalRadius()
+{
+    DetectionSystemLanthanumBromide* pDetectionSystemLanthanumBromide = new DetectionSystemLanthanumBromide();
+    G4double out = pDetectionSystemLanthanumBromide->GetCrystalRadius();
+    return out;
+}
+
+G4double DetectorConstruction::GetLanthanumBromideCrystalLength()
+{
+    DetectionSystemLanthanumBromide* pDetectionSystemLanthanumBromide = new DetectionSystemLanthanumBromide();
+    G4double out = pDetectionSystemLanthanumBromide->GetCrystalLength();
+    return out;
+}
+
+G4double DetectorConstruction::GetLanthanumBromideR()
+{
+    DetectionSystemLanthanumBromide* pDetectionSystemLanthanumBromide = new DetectionSystemLanthanumBromide();
+    G4double out = pDetectionSystemLanthanumBromide->GetR();
+    return out;
+}
+
+G4double DetectorConstruction::GetLanthanumBromideTheta(G4int i)
+{
+    DetectionSystemLanthanumBromide* pDetectionSystemLanthanumBromide = new DetectionSystemLanthanumBromide();
+    G4double out = pDetectionSystemLanthanumBromide->GetTheta(i);
+    return out;
+}
+
+G4double DetectorConstruction::GetLanthanumBromidePhi(G4int i)
+{
+    DetectionSystemLanthanumBromide* pDetectionSystemLanthanumBromide = new DetectionSystemLanthanumBromide();
+    G4double out = pDetectionSystemLanthanumBromide->GetPhi(i);
+    return out;
+}
+G4double DetectorConstruction::GetLanthanumBromideYaw(G4int i)
+{
+    DetectionSystemLanthanumBromide* pDetectionSystemLanthanumBromide = new DetectionSystemLanthanumBromide();
+    G4double out = pDetectionSystemLanthanumBromide->GetYaw(i);
+    return out;
+}
+G4double DetectorConstruction::GetLanthanumBromidePitch(G4int i)
+{
+    DetectionSystemLanthanumBromide* pDetectionSystemLanthanumBromide = new DetectionSystemLanthanumBromide();
+    G4double out = pDetectionSystemLanthanumBromide->GetPitch(i);
+    return out;
+}
+G4double DetectorConstruction::GetLanthanumBromideRoll(G4int i)
+{
+    DetectionSystemLanthanumBromide* pDetectionSystemLanthanumBromide = new DetectionSystemLanthanumBromide();
+    G4double out = pDetectionSystemLanthanumBromide->GetRoll(i);
+    return out;
+}
+
+G4double DetectorConstruction::GetLanthanumBromideCrystalRadialPosition()
+{
+    DetectionSystemLanthanumBromide* pDetectionSystemLanthanumBromide = new DetectionSystemLanthanumBromide();
+    G4double out = pDetectionSystemLanthanumBromide->GetCrystalRadialPosition();
+    return out;
+}
+
 
 // Temporary Function for testing purposes
 void DetectorConstruction::AddDetectionSystemGriffinCustomDetector( G4int ndet = 0 ){
 
-  griffinDetectorsMap[griffinDetectorsMapIndex] = this->customDetectorNumber ; 
+  griffinDetectorsMap[griffinDetectorsMapIndex] = this->customDetectorNumber ;
   griffinDetectorsMapIndex++;
 
 
-	// NOTE: ndet served no purpose in this case but I left it in just in case this needs to be modified later. The position of a detector placed using this function must be set using
-	// SetDeadLayer. 
+    // NOTE: ndet served no purpose in this case but I left it in just in case this needs to be modified later. The position of a detector placed using this function must be set using
+    // SetDeadLayer.
 
   DetectionSystemGriffin* pGriffinCustom = new DetectionSystemGriffin( this->extensionSuppressorLocation , this->detectorShieldSelect, this->detectorRadialDistance, this->hevimetSelector ); // Select Forward (0) or Back (1)
 
@@ -509,15 +580,15 @@ void DetectorConstruction::AddDetectionSystemGriffinCustom(G4int ndet)
 }
 
 void DetectorConstruction::AddDetectionSystemGriffinShieldSelect( G4int ShieldSelect ){
-  this->detectorShieldSelect = ShieldSelect ; 
+  this->detectorShieldSelect = ShieldSelect ;
 }
 
 void DetectorConstruction::AddDetectionSystemGriffinSetRadialDistance( G4double detectorDist ){
-  this->detectorRadialDistance = detectorDist ; 
+  this->detectorRadialDistance = detectorDist ;
 }
 
 void DetectorConstruction::AddDetectionSystemGriffinSetExtensionSuppLocation( G4int detectorPos ){
-  this->extensionSuppressorLocation = detectorPos ; 
+  this->extensionSuppressorLocation = detectorPos ;
 }
 
 void DetectorConstruction::AddDetectionSystemGriffinSetDeadLayer( G4ThreeVector params )
@@ -525,7 +596,7 @@ void DetectorConstruction::AddDetectionSystemGriffinSetDeadLayer( G4ThreeVector 
 
   this->customDetectorNumber 		= (G4int)params.x(); // det_num
   this->customDetectorPosition  = (G4int)params.y(); // pos_num
-  this->customDetectorVal			  = (G4int)params.z(); // Unused at the moment. 
+  this->customDetectorVal			  = (G4int)params.z(); // Unused at the moment.
 
 }
 
@@ -682,14 +753,14 @@ void DetectorConstruction::AddDetectionSystemGriffinBackDetector(G4int ndet)
 
 void DetectorConstruction::AddDetectionSystemGriffinHevimet(G4int input)
 {
-  // Includes hevimet. 
-  this->hevimetSelector = input ; 
+  // Includes hevimet.
+  this->hevimetSelector = input ;
 
 }
 
 // This will be reaplced with the addGriffinCustomDetector function. The dead layer must be set using
-// the SetCustomDeadLayer command. This will take longer for many different detectors in different configurations, 
-// but it is possible to place multiple custom detectors using addGriffinCustom as well. 
+// the SetCustomDeadLayer command. This will take longer for many different detectors in different configurations,
+// but it is possible to place multiple custom detectors using addGriffinCustom as well.
 //void DetectorConstruction::AddDetectionSystemGriffinPositionConfig(G4ThreeVector input)
 //{
 //  G4int det_num = (G4int)input.x();
@@ -719,64 +790,44 @@ void DetectorConstruction::AddDetectionSystemSceptar(G4int ndet)
 
   DetectionSystemSceptar* pSceptar = new DetectionSystemSceptar() ;
   pSceptar->Build() ;
-	
   pSceptar->PlaceDetector( logicWorld, ndet ) ;
 }
 
-void DetectorConstruction::SetSpiceResolutionVariables(G4double intercept, G4double gain)
-{
-	this->SpiceResolutionVariables[0] = intercept;
-	this->SpiceResolutionVariables[1] = gain;
+//void DetectorConstruction::AddDetectionSystemSpice(G4int ndet)
+//{
+//    DetectionSystemSpice* pSpice = new DetectionSystemSpice() ;
+//    pSpice->Build() ;
 
-}
+//  pSpice->PlaceDetector( logicWorld, ndet ) ;
+//}
 
-void DetectorConstruction::AddDetectionSystemSpice(G4int nRings)
-{
+//void DetectorConstruction::AddDetectionSystemSpiceV02(G4int ndet)
+//{
 
-	DetectionSystemSpice* pSpice = new DetectionSystemSpice() ;
-	pSpice->Build(); 
-	
-	pSpice->AssignSpiceResolution(this->SpiceResolutionVariables[0], this->SpiceResolutionVariables[1]);
-	
-  G4int NumberSeg = 12; // Segments in Phi
-  G4int segmentID=0;
-  G4double annularDetectorDistance = 115*mm /*+ 150*mm*/;
-  G4ThreeVector pos(0,0,-annularDetectorDistance); 
-  pSpice->PlaceGuardRing(logicWorld, pos);
-  for(int ring = 0; ring<nRings; ring++)
-    {
-      for(int Seg=0; Seg<NumberSeg; Seg++)
-		{
-		  pSpice->PlaceDetector(logicWorld, pos, ring, Seg, segmentID);
-		  segmentID++;
-		} // end for(int Seg=0; Seg<NumberSeg; Seg++)
-    } // end for(int ring = 0; ring<nRings; ring++)
-}
+//    DetectionSystemSpiceV02* pSpiceV02 = new DetectionSystemSpiceV02() ;
+//    pSpiceV02->Build() ;
 
-void DetectorConstruction::AddDetectionSystemS3(G4int nRings)
-{
-	DetectionSystemS3* pS3 = new DetectionSystemS3();
-	pS3->Build();
-	
-  G4int NumberSeg = 32; // Segments in Phi
-  G4int detID=0;
-  G4double S3DetectorDistance = 21*mm /*+ 150*mm*/;
-  G4ThreeVector pos(0,0,S3DetectorDistance); 
-  pS3->PlaceGuardRing(logicWorld, pos);
-  for(int ring = 0; ring<nRings; ring++)
-	{
-		for(int Seg=0; Seg<NumberSeg; Seg++)
-		{
-			pS3->PlaceDetector(logicWorld, pos, ring, Seg, detID);
-			detID++;
-		} // end for(int Seg=0; Seg<NumberSeg; Seg++)
-	} // end for(int ring = 0; ring<nRings; ring++)
-}
+//  // Place in world !
+//  G4double phi = 0.0*deg;
+//  G4double theta = 0.0*deg;
 
-void DetectorConstruction::AddDetectionSystemPaces(G4int ndet)
-{
-	DetectionSystemPaces* pPaces = new DetectionSystemPaces() ; 
-	pPaces->Build() ;
-	
-	pPaces->PlaceDetector( logicWorld, ndet ) ;
-}
+//  G4ThreeVector direction = G4ThreeVector( sin(theta)*cos(phi) , sin(theta)*sin(phi) , cos(theta) ) ;
+//  G4double position = 0.0*mm;
+//  G4ThreeVector move = position * direction;
+
+//  G4RotationMatrix* rotate = new G4RotationMatrix; 		//rotation matrix corresponding to direction vector
+//  rotate->rotateX(0);
+//  rotate->rotateY(0);
+//  rotate->rotateZ(0);
+
+//  pSpiceV02->PlaceDetector( logicWorld, move, rotate, ndet ) ;
+
+//}
+
+//void DetectorConstruction::AddDetectionSystemPaces(G4int ndet)
+//{
+//    DetectionSystemPaces* pPaces = new DetectionSystemPaces() ;
+//    pPaces->Build() ;
+
+//    pPaces->PlaceDetector( logicWorld, ndet ) ;
+//}

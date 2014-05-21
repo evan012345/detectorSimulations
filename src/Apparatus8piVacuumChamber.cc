@@ -22,6 +22,8 @@
 
 #include "Apparatus8piVacuumChamber.hh"
 
+#include "G4SystemOfUnits.hh" // new version geant4.10 requires units
+
 //constructor suppressed
 
 Apparatus8piVacuumChamber::~Apparatus8piVacuumChamber()
@@ -52,10 +54,10 @@ void Apparatus8piVacuumChamber::BuildApparatus8piVacuumChamberSphere()
    vis_att->SetVisibility(true);
 
    G4double startPhi = 0;
-   G4double endPhi = 2*pi;
+   G4double endPhi = 2*M_PI;
 
    G4double startTheta = 0;
-   G4double endTheta = pi;
+   G4double endTheta = M_PI;
 
    G4double inner_radius = this->vacuum_chamber_inner_radius;
    G4double outer_radius = this->vacuum_chamber_outer_radius;

@@ -38,6 +38,8 @@
 #include "DetectionSystem8pi.hh"
 #include "globals.hh"
 
+#include "G4AssemblyVolume.hh"
+
 class DetectionSystem8pi
 {
   public:
