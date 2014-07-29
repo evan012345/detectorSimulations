@@ -281,6 +281,44 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep)
       fEventAction->AddHitTracker(mnemonic, evntNb, trackID, parentID, stepNumber, particleType, processType, systemID, cry-1, det-1, edep, pos2.x(), pos2.y(), pos2.z(), time2);
   }
 
+//  // gamma angular correlations in world
+//  found = volname.find("World");
+//  if (ekin != 0 && found!=G4String::npos && particleType == 1) {
+//      if(ekin <= (100.+2.)*keV && ekin >= (100.-2.)*keV) {
+//          det = 1;
+//      }
+//      else if(ekin <= (200.+2.)*keV && ekin >= (200.-2.)*keV) {
+//          det = 2;
+//      }
+//      else if(ekin <= (300.+2.)*keV && ekin >= (300.-2.)*keV) {
+//          det = 3;
+//      }
+//      else if(ekin <= (400.+2.)*keV && ekin >= (400.-2.)*keV) {
+//          det = 4;
+//      }
+//      else if(ekin <= (500.+2.)*keV && ekin >= (500.-2.)*keV) {
+//          det = 5;
+//      }
+//      else if(ekin <= (600.+2.)*keV && ekin >= (600.-2.)*keV) {
+//          det = 6;
+//      }
+//      else if(ekin <= (700.+2.)*keV && ekin >= (700.-2.)*keV) {
+//          det = 7;
+//      }
+//      else if(ekin <= (800.+2.)*keV && ekin >= (800.-2.)*keV) {
+//          det = 8;
+//      }
+//      else {
+//          det = 9;
+//      }
+//      cry = 1;
+//      systemID = 9999;
+//      mnemonic.replace(0,3,"GAC");
+//      mnemonic.replace(3,2,G4intToG4String(det));
+//      mnemonic.replace(5,1,GetCrystalColour(cry));
+//      fEventAction->AddHitTracker(mnemonic, evntNb, trackID, parentID, stepNumber, particleType, processType, systemID, cry-1, det-1, ekin, pos2.x(), pos2.y(), pos2.z(), time2);
+//  }
+
 }
 
 void SteppingAction::SetDetAndCryNumberForGriffinComponent(G4String volname)
